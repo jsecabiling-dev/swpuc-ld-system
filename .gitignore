@@ -3,6 +3,9 @@ node_modules/
 .env.*
 !.env.example
 !.env.*.example
+!frontend/.env.production
 frontend/dist/
 /swpuc-ld-system.sql
 /temp/
+/swpuc-ld-system-*.zip
+/learndev-frontend-*.zip

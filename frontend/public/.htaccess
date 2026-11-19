@@ -1,6 +1,6 @@
 Options -MultiViews
 RewriteEngine On
-RewriteBase /dist/
+RewriteBase /
 
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
