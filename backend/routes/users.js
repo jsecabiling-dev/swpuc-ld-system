@@ -6,6 +6,7 @@ const fs = require('fs/promises');
 const os = require('os');
 const path = require('path');
 const db = require('../config/db');
+const { unitTypeLabelSql } = require('../utils/unitTypeCodes');
 const { PERMISSIONS, requirePermission, requireAnyPermission } = require('../middleware/permissions');
 
 const router = express.Router();
@@ -183,7 +184,7 @@ router.use(authenticateToken);
 router.get('/options', requireAnyPermission('users.add', 'users.edit'), async (req, res, next) => {
     try {
         const [units] = await db.execute(
-            'SELECT unit_id, name, unit_type FROM organizational_units ORDER BY name'
+            `SELECT unit_id, name, ${unitTypeLabelSql('unit_type')} AS unit_type FROM organizational_units ORDER BY name`
         );
 
         res.json({ success: true, data: { units, permissions: PERMISSIONS } });
@@ -225,7 +226,7 @@ router.put('/:id/permissions', requireUserEdit, async (req, res, next) => {
 const USER_LIST_QUERY = `
     SELECT u.user_id, u.first_name, u.middle_name, u.last_name, u.suffix,
            u.email, u.phone_number, u.profilepict,
-           u.unit_id, o.name AS unit_name, o.unit_type, u.is_active, u.created_at
+           u.unit_id, o.name AS unit_name, ${unitTypeLabelSql('o.unit_type')} AS unit_type, u.is_active, u.created_at
     FROM users u
     JOIN organizational_units o ON o.unit_id = u.unit_id
 `;

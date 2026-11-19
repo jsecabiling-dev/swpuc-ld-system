@@ -249,7 +249,7 @@ function InstitutionList() {
                 <table className="table table-hover align-middle mb-0">
                   <caption className="visually-hidden">Institutions, their mother units, and available actions</caption>
                   <thead className="table-light">
-                    <tr>
+                    <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                       <th scope="col">Institution</th>
                       <th scope="col">Mother institution</th>
                       <th scope="col" className="text-center">Children</th>
@@ -258,8 +258,8 @@ function InstitutionList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredInstitutions.map((institution) => (
-                      <tr key={institution.unit_id}>
+                    {[...filteredInstitutions].sort((a, b) => Number(b.unit_id) - Number(a.unit_id)).map((institution) => (
+                      <tr key={institution.unit_id}><td className="text-nowrap text-center">{institution.unit_id}</td>
                         <td>
                           <div className="fw-semibold">{institution.name}</div>
                           <small className="text-muted">{formatLabel(institution.unit_type)}</small>

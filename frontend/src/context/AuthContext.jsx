@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 export const AuthContext = createContext();
@@ -10,6 +11,9 @@ const IDLE_TIMEOUT_MS = Number.isFinite(configuredIdleTimeoutMinutes) && configu
 const LAST_ACTIVITY_KEY = 'ld_cert_last_activity_at';
 
 export const AuthProvider = ({ children }) => {
+    const navigate = useNavigate();
+    const navigateRef = useRef(navigate);
+    navigateRef.current = navigate;
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -25,7 +29,11 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('ld_cert_token');
         localStorage.removeItem('isAuthenticated');
         localStorage.removeItem(LAST_ACTIVITY_KEY);
+        localStorage.removeItem('userName');
+        localStorage.removeItem('profilePict');
         setUser(null);
+        setLoading(false);
+        navigateRef.current('/login', { replace: true });
     }, []);
 
     useEffect(() => {

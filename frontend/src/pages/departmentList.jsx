@@ -177,15 +177,15 @@ function DepartmentList() {
                 <table className="table table-hover align-middle mb-0">
                   <caption className="visually-hidden">Departments and available actions</caption>
                   <thead className="table-light">
-                    <tr>
+                    <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                       <th scope="col">Department</th>
                       <th scope="col">Created</th>
                       <th scope="col" className="text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredDepartments.map((department) => (
-                      <tr key={department.department_id}>
+                    {[...filteredDepartments].sort((a, b) => Number(b.department_id) - Number(a.department_id)).map((department) => (
+                      <tr key={department.department_id}><td className="text-nowrap text-center">{department.department_id}</td>
                         <td>
                           <div className="fw-semibold">{department.name}</div>
                           <small className="text-muted">{department.description || 'Department'}</small>

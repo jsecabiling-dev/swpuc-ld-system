@@ -457,7 +457,7 @@ function UserList() {
               <table className="table table-hover align-middle mb-0">
                 <caption className="visually-hidden">Users with account status and available actions</caption>
                 <thead className="table-light">
-                  <tr>
+                  <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                     <th scope="col">Name</th>
                     <th scope="col">Contact</th>
                     <th scope="col">Institution</th>
@@ -466,8 +466,8 @@ function UserList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((item) => (
-                    <tr key={item.user_id}>
+                  {[...filteredUsers].sort((a, b) => Number(b.user_id) - Number(a.user_id)).map((item) => (
+                    <tr key={item.user_id}><td className="text-nowrap text-center">{item.user_id}</td>
                       <td>
                         <div className="d-flex align-items-center gap-2">
                           <ProfileAvatar key={`${item.user_id}-${item.profilepict || 'no-picture'}`} user={item} />

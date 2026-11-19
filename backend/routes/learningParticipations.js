@@ -4,6 +4,8 @@ const { randomBytes } = require('crypto');
 const db = require('../config/db');
 const { requirePermission } = require('../middleware/permissions');
 
+const { deliveryLabelSql } = require('../utils/learningEventCodes');
+
 const router = express.Router();
 
 async function authenticateToken(req, res, next) {
@@ -129,7 +131,7 @@ router.get('/', async (req, res, next) => {
                     learning_course.title AS course_title,
                     learning_course.learning_level AS learning_level,
                     learning_event.start_date, learning_event.end_date, learning_event.venue,
-                    learning_event.delivery_mode, event_institution.name AS offering_institution,
+                    ${deliveryLabelSql('learning_event.delivery_mode')} AS delivery_mode, event_institution.name AS offering_institution,
                     participation.attended,
                     participation.completed, participation.certified,
                     participation.certificate_number, participation.certification_date,
@@ -160,7 +162,7 @@ router.post('/', requireProgressAdd, async (req, res, next) => {
         const [events] = await db.execute(
             `SELECT learning_event.event_id
              FROM learning_events learning_event
-             WHERE learning_event.event_id = ? AND learning_event.status = 'Approved'`,
+             WHERE learning_event.event_id = ? AND learning_event.status = 3`,
             [parsed.data.eventId]
         );
         if (!events.length) return res.status(400).json({ success: false, message: 'Participants can only be registered for an approved learning event.' });
@@ -209,7 +211,7 @@ router.put('/:id', requireProgressEdit, async (req, res, next) => {
         const [events] = await db.execute(
             `SELECT learning_event.event_id
              FROM learning_events learning_event
-             WHERE learning_event.event_id = ? AND learning_event.status = 'Approved'`,
+             WHERE learning_event.event_id = ? AND learning_event.status = 3`,
             [parsed.data.eventId]
         );
         if (!events.length) return res.status(400).json({ success: false, message: 'Learning records can only be assigned to an approved event.' });

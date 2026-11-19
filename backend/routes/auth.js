@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const db = require('../config/db');
+const { unitTypeLabelSql } = require('../utils/unitTypeCodes');
 
 // Login Endpoint
 router.post('/login', async (req, res) => {
@@ -19,7 +20,7 @@ router.post('/login', async (req, res) => {
         // Find user by email OR phone number and join their organizational unit info
         // Added u.middle_name and u.profilepict explicitly to the column query select matrix
         const query = `
-            SELECT u.*, o.name AS unit_name, o.unit_type 
+            SELECT u.*, o.name AS unit_name, ${unitTypeLabelSql('o.unit_type')} AS unit_type
             FROM users u
             JOIN organizational_units o ON u.unit_id = o.unit_id
             WHERE (u.email = ? OR u.phone_number = ?) AND u.is_active = TRUE
@@ -171,7 +172,7 @@ router.post('/change-password', async (req, res) => {
                     u.can_add_courses, u.can_edit_courses, u.can_delete_courses,
                     u.can_add_events, u.can_edit_events, u.can_delete_events,
                     u.can_add_progress, u.can_edit_progress, u.can_delete_progress,
-                    o.name AS unit_name, o.unit_type
+                    o.name AS unit_name, ${unitTypeLabelSql('o.unit_type')} AS unit_type
              FROM users u
              JOIN organizational_units o ON o.unit_id = u.unit_id
              WHERE u.user_id = ? AND u.is_active = TRUE`,

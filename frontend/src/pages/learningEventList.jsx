@@ -522,7 +522,7 @@ function LearningEventList() {
                   <caption className="visually-hidden">Learning events with event IDs, schedule, offering institution, and available actions</caption>
                   <thead className="table-light">
                     <tr>
-                      <th scope="col" className="text-center">Event ID</th>
+                      <th scope="col" className="text-center">ID No</th>
                       <th scope="col" className="text-start" style={{ minWidth: '260px' }}>Course Title</th>
                       <th scope="col" style={{ width: '150px', maxWidth: '150px' }}>Offering Institution</th>
                       <th scope="col" className="text-nowrap" style={{ minWidth: '150px' }}>Schedule</th>

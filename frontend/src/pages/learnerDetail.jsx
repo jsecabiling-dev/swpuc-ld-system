@@ -246,7 +246,7 @@ function LearnerDetail() {
                     <caption className="visually-hidden">Learning events and progress for {fullName(learner)}</caption>
                     <thead className="table-light">
                       <tr>
-                        <th scope="col">ID</th>
+                        <th scope="col" className="text-center">ID No</th>
                         <th scope="col">Event</th>
                         <th scope="col">Offering Institution</th>
                         <th scope="col">Schedule</th>
@@ -258,7 +258,7 @@ function LearnerDetail() {
                       </tr>
                     </thead>
                     <tbody>
-                      {journey.map((record) => (
+                      {[...journey].sort((a, b) => Number(b.participation_id) - Number(a.participation_id)).map((record) => (
                         <tr key={record.participation_id}>
                           <td>{record.event_id || '—'}</td>
                           <td>

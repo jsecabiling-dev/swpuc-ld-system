@@ -507,7 +507,7 @@ function LearningEventView() {
                       <thead className="table-light">
                         <tr>
                           {canEditProgress && (
-                            <th scope="col" className="text-center">
+                            <th scope="col" className="text-center participant-select-column">
                               <input
                                 className="form-check-input"
                                 type="checkbox"
@@ -519,6 +519,7 @@ function LearningEventView() {
                               />
                             </th>
                           )}
+                          <th scope="col" className="text-nowrap text-center participant-id-column">ID No</th>
                           <th scope="col">Name</th>
                           <th scope="col">Affiliation</th>
                           <th scope="col" className="text-center">Attended</th>
@@ -528,10 +529,10 @@ function LearningEventView() {
                         </tr>
                       </thead>
                       <tbody>
-                        {participants.map((participant) => (
+                        {[...participants].sort((a, b) => Number(b.participation_id) - Number(a.participation_id)).map((participant) => (
                           <tr key={participant.participation_id}>
                             {canEditProgress && (
-                              <td className="text-center">
+                              <td className="text-center participant-select-column">
                                 <input
                                   className="form-check-input"
                                   type="checkbox"
@@ -545,6 +546,7 @@ function LearningEventView() {
                                 />
                               </td>
                             )}
+                            <td className="text-nowrap text-center participant-id-column">{participant.participation_id}</td>
                             <td>
                               <div className="d-flex align-items-center gap-2">
                                 <ParticipantAvatar participant={participant} />

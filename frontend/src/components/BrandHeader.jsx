@@ -29,9 +29,6 @@ function BrandHeader({ showMenu = true }) {
 
   const handleLogout = () => {
     logout();
-    localStorage.removeItem('userName');
-    localStorage.removeItem('profilePict');
-    window.location.replace(import.meta.env.BASE_URL || '/');
   };
 
   return (

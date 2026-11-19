@@ -1,10 +1,11 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const { UNIT_TYPE_CODES, unitTypeLabelSql } = require('../utils/unitTypeCodes');
 const { requirePermission, requireAnyPermission } = require('../middleware/permissions');
 
 const router = express.Router();
-const UNIT_TYPES = ['Union', 'Mission', 'District', 'Local_Church', 'Hospital', 'School', 'Services'];
+const UNIT_TYPES = Object.keys(UNIT_TYPE_CODES);
 
 async function authenticateToken(req, res, next) {
     const authorization = req.get('authorization') || '';
@@ -50,7 +51,7 @@ router.use(authenticateToken);
 router.get('/options', requireAnyPermission('events.add', 'events.edit'), async (req, res, next) => {
     try {
         const [units] = await db.execute(
-            `SELECT unit_id, name, unit_type, parent_unit_id
+            `SELECT unit_id, name, ${unitTypeLabelSql('unit_type')} AS unit_type, parent_unit_id
              FROM organizational_units ORDER BY name`
         );
         res.json({ success: true, data: units });
@@ -62,7 +63,7 @@ router.get('/options', requireAnyPermission('events.add', 'events.edit'), async 
 router.get('/', async (req, res, next) => {
     try {
         const [institutions] = await db.execute(
-            `SELECT unit.unit_id, unit.name, unit.unit_type, unit.parent_unit_id,
+            `SELECT unit.unit_id, unit.name, ${unitTypeLabelSql('unit.unit_type')} AS unit_type, unit.parent_unit_id,
                     parent.name AS parent_name, unit.created_at,
                     (SELECT COUNT(*) FROM organizational_units child
                      WHERE child.parent_unit_id = unit.unit_id) AS child_count
@@ -124,7 +125,7 @@ router.put('/:id', requireInstitutionEdit, async (req, res, next) => {
         const [duplicates] = await db.execute(
             `SELECT unit_id FROM organizational_units
              WHERE unit_id <> ? AND LOWER(name) = LOWER(?) AND unit_type = ? AND parent_unit_id <=> ?`,
-            [unitId, name, unitType, parentUnitId]
+            [unitId, name, UNIT_TYPE_CODES[unitType], parentUnitId]
         );
         if (duplicates.length) {
             return res.status(409).json({ success: false, message: 'This institution already exists under the selected mother institution.' });
@@ -134,10 +135,10 @@ router.put('/:id', requireInstitutionEdit, async (req, res, next) => {
             `UPDATE organizational_units
              SET name = ?, unit_type = ?, parent_unit_id = ?
              WHERE unit_id = ?`,
-            [name, unitType, parentUnitId, unitId]
+            [name, UNIT_TYPE_CODES[unitType], parentUnitId, unitId]
         );
         const [updated] = await db.execute(
-            `SELECT unit.unit_id, unit.name, unit.unit_type, unit.parent_unit_id,
+            `SELECT unit.unit_id, unit.name, ${unitTypeLabelSql('unit.unit_type')} AS unit_type, unit.parent_unit_id,
                     parent.name AS parent_name, unit.created_at,
                     (SELECT COUNT(*) FROM organizational_units child
                      WHERE child.parent_unit_id = unit.unit_id) AS child_count
@@ -189,7 +190,7 @@ router.post('/', requirePermission('events.add'), async (req, res, next) => {
         const [duplicates] = await db.execute(
             `SELECT unit_id FROM organizational_units
              WHERE LOWER(name) = LOWER(?) AND unit_type = ? AND parent_unit_id <=> ?`,
-            [name, unitType, parentUnitId]
+            [name, UNIT_TYPE_CODES[unitType], parentUnitId]
         );
         if (duplicates.length) {
             return res.status(409).json({ success: false, message: 'This institution already exists under the selected parent.' });
@@ -198,10 +199,10 @@ router.post('/', requirePermission('events.add'), async (req, res, next) => {
         const [result] = await db.execute(
             `INSERT INTO organizational_units (name, unit_type, parent_unit_id)
              VALUES (?, ?, ?)`,
-            [name, unitType, parentUnitId]
+            [name, UNIT_TYPE_CODES[unitType], parentUnitId]
         );
         const [created] = await db.execute(
-            `SELECT child.unit_id, child.name, child.unit_type, child.parent_unit_id,
+            `SELECT child.unit_id, child.name, ${unitTypeLabelSql('child.unit_type')} AS unit_type, child.parent_unit_id,
                     parent.name AS parent_name
              FROM organizational_units child
              LEFT JOIN organizational_units parent ON parent.unit_id = child.parent_unit_id

@@ -170,6 +170,14 @@ body, input, button, select, label {
     padding-bottom: 0.2rem;
 }
 
+.event-participants-table .participant-select-column,
+.event-participants-table .participant-id-column {
+  width: 1%;
+  white-space: nowrap;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
 .event-participants-table .user-action-button {
     width: 1.75rem;
     height: 1.75rem;

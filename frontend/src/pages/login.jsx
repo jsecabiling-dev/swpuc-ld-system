@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import SiteFooter from '../components/SiteFooter';
 import sdaLogoGreen from './thumbnails/sda_logo_green.png';
@@ -16,22 +16,11 @@ function formatFullName(firstName, middleName, lastName, suffix) {
 
 function Login() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user, login, loading: authLoading } = useContext(AuthContext);
+  const { login, loading: authLoading } = useContext(AuthContext);
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const requestedPage = location.state?.from;
-  const postLoginPath = requestedPage?.pathname && requestedPage.pathname !== '/login'
-    ? `${requestedPage.pathname}${requestedPage.search || ''}${requestedPage.hash || ''}`
-    : '/home';
-
-  useEffect(() => {
-    if (!authLoading && user) {
-      navigate(user.mustChangePassword ? '/change-password' : postLoginPath, { replace: true });
-    }
-  }, [authLoading, user, navigate, postLoginPath]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -59,7 +48,7 @@ function Login() {
       localStorage.setItem('userName', fullName || 'User');
       localStorage.setItem('profilePict', profile.profilepict || '');
 
-      navigate(result.user?.mustChangePassword ? '/change-password' : postLoginPath, { replace: true });
+      navigate(result.user?.mustChangePassword ? '/change-password' : '/home', { replace: true });
     } catch (requestError) {
       setError('Unable to sign in right now. Please try again.');
     } finally {
@@ -80,9 +69,6 @@ function Login() {
           width: '100%',
         }}
       >
-        <Link className="btn btn-link text-secondary p-1 position-absolute top-0 end-0 mt-2 me-2" to="/" aria-label="Home" title="Home">
-          <i className="bi bi-house-door fs-4" aria-hidden="true" />
-        </Link>
         <header className="text-center mb-4">
           <img
             src={sdaLogoGreen}

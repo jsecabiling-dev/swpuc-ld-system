@@ -146,7 +146,7 @@ function LearnerList() {
                 <table className="table table-hover align-middle mb-0">
                   <caption className="visually-hidden">Learner names and affiliations</caption>
                   <thead className="table-light">
-                    <tr>
+                    <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                       <th scope="col">Name</th>
                       <th scope="col">Affiliation</th>
                       <th scope="col" className="text-center">Events Participated</th>
@@ -154,8 +154,8 @@ function LearnerList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredLearners.map((learner) => (
-                      <tr key={learner.user_id}>
+                    {[...filteredLearners].sort((a, b) => Number(b.user_id) - Number(a.user_id)).map((learner) => (
+                      <tr key={learner.user_id}><td className="text-nowrap text-center">{learner.user_id}</td>
                         <td>
                           <div className="d-flex align-items-center gap-2">
                             <LearnerAvatar learner={learner} />

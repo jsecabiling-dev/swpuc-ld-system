@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/login'; 
 import Home from './pages/home';
 import UserAdd from './pages/userAdd';
@@ -38,13 +38,9 @@ const ProtectedRoute = ({ children, requirePasswordChange = false }) => {
 
 function App() {
   return (
-    /* Add the future configuration object attribute right here */
-    <Router
-      basename={import.meta.env.BASE_URL.replace(/\/$/, '')}
-      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-    >
+    <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/help"
@@ -173,7 +169,7 @@ function App() {
         {/* Baseline safety fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Router>
+    </>
   );
 }
 

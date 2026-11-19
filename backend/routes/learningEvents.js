@@ -1,10 +1,12 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const { unitTypeLabelSql } = require('../utils/unitTypeCodes');
 const { requirePermission, requireAnyPermission } = require('../middleware/permissions');
 
 const router = express.Router();
-const DELIVERY_MODES = ['In_Person', 'Online', 'Hybrid'];
+const { DELIVERY_CODES, STATUS_CODES, deliveryLabelSql, statusLabelSql } = require('../utils/learningEventCodes');
+const DELIVERY_MODES = Object.keys(DELIVERY_CODES);
 
 async function authenticateToken(req, res, next) {
     const authorization = req.get('authorization') || '';
@@ -150,8 +152,8 @@ const EVENT_LIST_QUERY = `
            course_department.name AS course_department_name,
            learning_event.institution_id, institution.name AS institution_name,
            learning_event.department_id, department.name AS department_name,
-           learning_event.start_date, learning_event.end_date, learning_event.venue, learning_event.delivery_mode,
-           learning_event.status,
+           learning_event.start_date, learning_event.end_date, learning_event.venue, ${deliveryLabelSql('learning_event.delivery_mode')} AS delivery_mode,
+           ${statusLabelSql('learning_event.status')} AS status,
            learning_event.description, learning_event.created_at, learning_event.updated_at
     FROM learning_events learning_event
     LEFT JOIN learning_courses course ON course.course_id = learning_event.course_id
@@ -166,7 +168,7 @@ router.get('/options', requireAnyPermission('events.add', 'events.edit'), async 
     try {
         const [[courses], [institutions], [departments]] = await Promise.all([
             db.execute('SELECT course_id, title, learning_level FROM learning_courses ORDER BY title'),
-            db.execute('SELECT unit_id, name, unit_type FROM organizational_units ORDER BY name'),
+            db.execute(`SELECT unit_id, name, ${unitTypeLabelSql('unit_type')} AS unit_type FROM organizational_units ORDER BY name`),
             db.execute('SELECT department_id, name FROM departments ORDER BY name'),
         ]);
         res.json({ success: true, data: { courses, institutions, departments } });
@@ -246,7 +248,7 @@ router.get('/:id', async (req, res, next) => {
                     learning_event.institution_id, institution.name AS institution_name,
                     learning_event.department_id, department.name AS department_name,
                     learning_event.start_date, learning_event.end_date,
-                    learning_event.venue, learning_event.delivery_mode, learning_event.status,
+                    learning_event.venue, ${deliveryLabelSql('learning_event.delivery_mode')} AS delivery_mode, ${statusLabelSql('learning_event.status')} AS status,
                     learning_event.description, learning_event.created_at,
                     participation.participation_id, participation.user_id,
                     participation.attended, participation.completed, participation.certified,
@@ -356,7 +358,7 @@ router.post('/', requireEventAdd, async (req, res, next) => {
                 parsed.data.startDate,
                 parsed.data.endDate,
                 parsed.data.venue,
-                parsed.data.deliveryMode,
+                DELIVERY_CODES[parsed.data.deliveryMode],
                 parsed.data.description,
                 req.auth.user_id,
             ]
@@ -409,7 +411,7 @@ router.put('/:id', requireEventEdit, async (req, res, next) => {
                 parsed.data.startDate,
                 parsed.data.endDate,
                 parsed.data.venue,
-                parsed.data.deliveryMode,
+                DELIVERY_CODES[parsed.data.deliveryMode],
                 parsed.data.description,
                 eventId,
             ]
@@ -453,7 +455,7 @@ router.patch('/:id/status', requireEventEdit, async (req, res, next) => {
     }
 
     try {
-        const [events] = await db.execute('SELECT status FROM learning_events WHERE event_id = ?', [eventId]);
+        const [events] = await db.execute(`SELECT ${statusLabelSql('status')} AS status FROM learning_events WHERE event_id = ?`, [eventId]);
         if (!events.length) return res.status(404).json({ success: false, message: 'Learning event not found.' });
         const currentStatus = events[0].status;
         if (!allowedNextStatuses[currentStatus]?.includes(nextStatus)) {
@@ -463,12 +465,12 @@ router.patch('/:id/status', requireEventEdit, async (req, res, next) => {
         const [result] = isRevertingRejection
             ? await db.execute(
                 `UPDATE learning_events SET status = ?
-                 WHERE event_id = ? AND status = 'Rejected' AND start_date > CURRENT_DATE`,
-                [nextStatus, eventId]
+                 WHERE event_id = ? AND status = 4 AND start_date > CURRENT_DATE`,
+                [STATUS_CODES[nextStatus], eventId]
             )
             : await db.execute(
                 'UPDATE learning_events SET status = ? WHERE event_id = ? AND status = ?',
-                [nextStatus, eventId, currentStatus]
+                [STATUS_CODES[nextStatus], eventId, STATUS_CODES[currentStatus]]
             );
         if (!result.affectedRows) return res.status(409).json({ success: false, message: isRevertingRejection ? 'A rejected proposal can only be reverted before its start date.' : 'The proposal status changed. Refresh and try again.' });
         res.json({ success: true, status: nextStatus, message: 'Proposal status updated.' });

@@ -252,7 +252,7 @@ function LearningCourseList() {
                 <table className="table table-hover align-middle mb-0">
                   <caption className="visually-hidden">Learning course titles and hosting departments</caption>
                   <thead className="table-light">
-                    <tr>
+                    <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                       <th scope="col">Course Title</th>
                       <th scope="col" className="text-center">Learning Level</th>
                       <th scope="col">Hosting Department</th>
@@ -260,8 +260,8 @@ function LearningCourseList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredCourses.map((course) => (
-                      <tr key={course.course_id}>
+                    {[...filteredCourses].sort((a, b) => Number(b.course_id) - Number(a.course_id)).map((course) => (
+                      <tr key={course.course_id}><td className="text-nowrap text-center">{course.course_id}</td>
                         <td className="fw-semibold">{course.title}</td>
                         <td className="text-center">{course.learning_level || 'Not assigned'}</td>
                         <td>{course.department_name || 'Not assigned'}</td>
@@ -321,7 +321,7 @@ function LearningCourseList() {
                             <table className="table table-sm table-striped align-middle mb-0">
                               <caption className="visually-hidden">Mentor and certifier accreditation for {selectedCourse.title}</caption>
                               <thead className="table-light">
-                                <tr>
+                                <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                                   <th scope="col">Profile</th>
                                   <th scope="col">Name</th>
                                   <th scope="col">Institution</th>
@@ -330,8 +330,8 @@ function LearningCourseList() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {accreditationRows.map((person) => (
-                                  <tr key={person.user_id}>
+                                {[...accreditationRows].sort((a, b) => Number(b.user_id) - Number(a.user_id)).map((person) => (
+                                  <tr key={person.user_id}><td className="text-nowrap text-center">{person.user_id}</td>
                                     <td><CommunityProfileAvatar person={person} size="2.5rem" /></td>
                                     <td>{[person.first_name, person.middle_name, person.last_name, person.suffix].filter(Boolean).join(' ')}</td>
                                     <td>{person.institution_name || '—'}</td>
