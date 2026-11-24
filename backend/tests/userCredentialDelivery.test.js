@@ -233,6 +233,17 @@ test('signup review list supports pagination and validates status updates', asyn
     const invalidStatus = response();
     await update({ params: { id: '1' }, body: { status: 'approved' } }, invalidStatus);
     assert.equal(invalidStatus.statusCode, 400);
+
+    database.execute = async (sql, params) => {
+        if (sql.startsWith('SELECT')) return [[{ request_id: 1, status: 'reviewed' }]];
+        assert.match(sql, /reviewed_at = NULL/);
+        assert.match(sql, /status <> 'created'/);
+        assert.deepEqual(params, ['pending', 1]);
+        return [{ affectedRows: 1 }];
+    };
+    const pending = response();
+    await update({ params: { id: '1' }, body: { status: 'pending' } }, pending);
+    assert.equal(pending.body.success, true);
 });
 
 test('reset requires email and preserves the old password if mail fails', async () => {

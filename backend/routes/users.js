@@ -232,7 +232,12 @@ router.patch('/signup-requests/:id', requireUserAdd, async (req, res) => {
         const [rows] = await db.execute('SELECT request_id, status FROM signup_requests WHERE request_id = ?', [id]);
         if (!rows.length) return res.status(404).json({ success: false, message: 'Signup request not found.' });
         if (rows[0].status === 'created') return res.status(409).json({ success: false, message: 'This request already has an account.' });
-        const [result] = await db.execute('UPDATE signup_requests SET status = ?, reviewed_at = IF(? = \'pending\', NULL, CURRENT_TIMESTAMP) WHERE request_id = ? AND status <> \'created\'', [status, status, id]);
+        const reviewedAt = status === 'pending' ? 'NULL' : 'CURRENT_TIMESTAMP';
+        const [result] = await db.execute(
+            `UPDATE signup_requests SET status = ?, reviewed_at = ${reviewedAt}
+             WHERE request_id = ? AND status <> 'created'`,
+            [status, id],
+        );
         if (!result.affectedRows) return res.status(409).json({ success: false, message: 'The request changed. Reload the list before trying again.' });
         res.json({ success: true, message: 'Request status updated.' });
     } catch (error) {
