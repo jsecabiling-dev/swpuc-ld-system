@@ -235,7 +235,8 @@ router.patch('/signup-requests/:id', requireUserAdd, async (req, res) => {
         const [result] = await db.execute('UPDATE signup_requests SET status = ?, reviewed_at = IF(? = \'pending\', NULL, CURRENT_TIMESTAMP) WHERE request_id = ? AND status <> \'created\'', [status, status, id]);
         if (!result.affectedRows) return res.status(409).json({ success: false, message: 'The request changed. Reload the list before trying again.' });
         res.json({ success: true, message: 'Request status updated.' });
-    } catch {
+    } catch (error) {
+        console.error('Signup request status update failed', { requestId: id, code: error.code, errno: error.errno });
         res.status(503).json({ success: false, message: 'Could not update this signup request.' });
     }
 });
