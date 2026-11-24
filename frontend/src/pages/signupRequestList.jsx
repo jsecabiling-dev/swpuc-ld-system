@@ -8,6 +8,15 @@ import './userList.css';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('ld_cert_token') || ''}` });
 
+async function readApiResponse(response, fallbackMessage) {
+  const result = await response.json().catch(() => null);
+  if (!result || typeof result !== 'object') {
+    throw new Error(`${fallbackMessage} The API returned an unexpected response (HTTP ${response.status}).`);
+  }
+  if (!response.ok || !result.success) throw new Error(result.message || fallbackMessage);
+  return result;
+}
+
 function SignupRequestList() {
   const { user } = useContext(AuthContext);
   const allowed = Boolean(user?.canAddUsers);
@@ -26,8 +35,7 @@ function SignupRequestList() {
     setError('');
     fetch(`${API_BASE_URL}/api/users/signup-requests?page=${page}`, { headers: headers(), signal: controller.signal })
       .then(async (response) => {
-        const result = await response.json();
-        if (!response.ok || !result.success) throw new Error(result.message || 'Could not load requests.');
+        const result = await readApiResponse(response, 'Could not load requests.');
         setRequests(result.data);
         setTotal(result.total);
       })
@@ -43,8 +51,7 @@ function SignupRequestList() {
       const response = await fetch(`${API_BASE_URL}/api/users/signup-requests/${id}`, {
         method: 'PATCH', headers: { ...headers(), 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
       });
-      const result = await response.json();
-      if (!response.ok || !result.success) throw new Error(result.message || 'Could not update request.');
+      await readApiResponse(response, 'Could not update request.');
       setRequests((current) => current.map((request) => request.request_id === id ? { ...request, status } : request));
     } catch (updateError) { setError(updateError.message); }
     finally { setSavingId(null); }
@@ -59,8 +66,7 @@ function SignupRequestList() {
       const response = await fetch(`${API_BASE_URL}/api/users/signup-requests/${request.request_id}/create-user`, {
         method: 'POST', headers: headers(),
       });
-      const result = await response.json();
-      if (!response.ok || !result.success) throw new Error(result.message || 'Could not create this account.');
+      const result = await readApiResponse(response, 'Could not create this account.');
       setRequests((current) => current.map((item) => item.request_id === request.request_id ? { ...item, status: 'created', created_user_id: result.user_id } : item));
       setNotice(result.message);
     } catch (createError) { setError(createError.message); }
