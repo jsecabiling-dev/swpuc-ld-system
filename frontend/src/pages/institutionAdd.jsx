@@ -153,7 +153,7 @@ function InstitutionAdd() {
                     required
                     disabled={loadingOptions || isSubmitting}
                   >
-                    <option value="">Choose an institution type</option>
+                    <option value="">Choose an institution type *</option>
                     {UNIT_TYPES.map((type) => <option key={type} value={type}>{formatLabel(type)}</option>)}
                   </select>
                 </div>

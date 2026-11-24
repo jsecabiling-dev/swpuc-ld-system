@@ -625,7 +625,7 @@ function LearningEventView() {
                           required
                           disabled={registering || !people.length}
                         >
-                          <option value="">{people.length ? 'Choose a user' : 'No users available'}</option>
+                          <option value="">{people.length ? 'Choose a user *' : 'No users available'}</option>
                           {people.map((person) => (
                             <option key={person.user_id} value={person.user_id}>
                               {[person.first_name, person.middle_name?.trim().charAt(0) ? `${person.middle_name.trim().charAt(0)}.` : '', person.last_name, person.suffix].filter(Boolean).join(' ')} (ID: {person.user_id}){person.is_active ? '' : ' — Inactive'}
@@ -749,9 +749,9 @@ function LearningEventView() {
                     <div className="modal-body">
                       <p className="mb-3">Applying one action to <strong>{selectedParticipantIds.length}</strong> selected participant(s).</p>
                       {error && <div className="alert alert-danger" role="alert">{error}</div>}
-                      <label className="form-label" htmlFor="bulk-status-action">Status update</label>
+                      <label className="form-label" htmlFor="bulk-status-action">Status update *</label>
                       <select id="bulk-status-action" className="form-select" value={bulkStatusAction} onChange={(event) => setBulkStatusAction(event.target.value)} disabled={savingStatus} required>
-                        <option value="" disabled>Select an action</option>
+                        <option value="" disabled>Select an action *</option>
                         <option value="mark_attended">Mark attended</option>
                         <option value="mark_completed">Mark completed</option>
                         <option value="mark_certified">Mark certified</option>

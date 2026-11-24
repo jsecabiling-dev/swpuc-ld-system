@@ -355,12 +355,12 @@ function LearningCourseList() {
                         </div>
                         <div className="mb-3">
                           <label htmlFor="edit-course-level" className="form-label">Learning level <span className="text-danger">*</span></label>
-                          <input id="edit-course-level" name="learning_level" className="form-control" value={editForm.learning_level} onChange={handleEditChange} maxLength={100} placeholder="e.g. Level 1" required disabled={isSaving} />
+                          <input id="edit-course-level" name="learning_level" className="form-control" value={editForm.learning_level} onChange={handleEditChange} maxLength={100} placeholder="e.g. Level 1 *" required disabled={isSaving} />
                         </div>
                         <div>
                           <label htmlFor="edit-course-department" className="form-label">Hosting department <span className="text-danger">*</span></label>
                           <select id="edit-course-department" name="department_id" className="form-select" value={editForm.department_id} onChange={handleEditChange} required disabled={isSaving || !departments.length}>
-                            <option value="">Choose a department</option>
+                            <option value="">Choose a department *</option>
                             {departments.map((department) => <option key={department.department_id} value={department.department_id}>{department.name}</option>)}
                           </select>
                         </div>

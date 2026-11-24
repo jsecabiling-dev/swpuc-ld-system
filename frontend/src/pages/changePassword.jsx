@@ -52,7 +52,7 @@ function ChangePassword() {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
-            <label htmlFor="new-password" className="form-label">New password</label>
+            <label htmlFor="new-password" className="form-label">New password *</label>
             <input
               id="new-password"
               type="password"
@@ -69,7 +69,7 @@ function ChangePassword() {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="confirm-password" className="form-label">Confirm new password</label>
+            <label htmlFor="confirm-password" className="form-label">Confirm new password *</label>
             <input
               id="confirm-password"
               type="password"

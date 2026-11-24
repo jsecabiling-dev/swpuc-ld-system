@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProfilePhotoCrop from '../components/ProfilePhotoCrop';
 import { processProfilePicture } from '../utils/processProfilePicture';
+import './profilePhotoUpload.css';
 
 const apiUrl = new URL(import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000', window.location.origin);
 if (['localhost', '127.0.0.1', '[::1]'].includes(apiUrl.hostname)) {
@@ -103,7 +104,7 @@ function PhotoUploadForm({ token }) {
 
   if (sent) {
     return (
-      <main className="container py-5 text-center" style={{ maxWidth: 480 }}>
+      <main className="container profile-photo-upload">
         <div role="status">
           <i className="bi bi-check-circle-fill text-success fs-1" aria-hidden="true" />
           <h1 className="h3 mt-3">Thank you!</h1>
@@ -114,7 +115,7 @@ function PhotoUploadForm({ token }) {
   }
 
   return (
-    <main className="container py-4" style={{ maxWidth: 480 }}>
+    <main className="container profile-photo-upload">
       <h1 className="h3">Upload profile photo</h1>
       {!token ? (
         <p role="alert">Scan the QR code from Edit User to upload a photo.</p>
@@ -127,11 +128,11 @@ function PhotoUploadForm({ token }) {
         <div>
           {photo && (
             <figure className="mb-3">
-              <img src={photo} alt="Selected profile photo" className="img-fluid rounded border" style={{ maxHeight: '45dvh', objectFit: 'contain' }} />
+              <img src={photo} alt="Selected profile photo" className="img-fluid rounded border profile-photo-preview" />
               <figcaption className="small text-secondary mt-2">Preview your photo before sending it.</figcaption>
             </figure>
           )}
-          <div className="d-flex flex-wrap gap-2 mb-3">
+          <div className="d-flex justify-content-center gap-2 mb-3 profile-photo-upload-actions">
             {photo && <button type="button" className="btn btn-outline-secondary" onClick={() => { setError(''); setCropping(true); }} disabled={busy || preparing}>Crop photo</button>}
             <label className={`btn btn-outline-secondary${busy || preparing ? ' disabled' : ''}`}>
               {photo ? 'Retake photo' : 'Take photo'}

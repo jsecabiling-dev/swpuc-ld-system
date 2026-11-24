@@ -131,14 +131,14 @@ function CommunityRoleList({ role }) {
               </div>
               <div className="modal-body d-flex flex-column" style={{ overflowY: 'auto' }}>
                 {error && <div className="alert alert-danger" role="alert">{error}</div>}
-                <label className="form-label" htmlFor={`${role}-user-search`}>Search existing user accounts</label>
+                <label className="form-label" htmlFor={`${role}-user-search`}>Search existing user accounts *</label>
                 <input
                   id={`${role}-user-search`}
                   className="form-control"
                   type="search"
                   value={candidateSearch}
                   onChange={(event) => { setCandidateSearch(event.target.value); setSelectedId(''); }}
-                  placeholder="Type a name, email, or affiliation"
+                  placeholder="Type a name, email, or affiliation *"
                   autoComplete="off"
                   role="combobox"
                   aria-autocomplete="list"

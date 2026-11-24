@@ -384,7 +384,7 @@ function LearnerDetail() {
                 <div className="modal-body">
                   <p className="text-muted">For {fullName(learner)} — {certificateRecord.event_name || certificateRecord.course_title || 'Learning event'}</p>
                   <p className="mb-3"><span className="fw-semibold">Certificate title:</span> {certificateRecord.event_name || certificateRecord.course_title || 'Learning event'}{formatCertificateLevel(certificateRecord.learning_level) ? ` ${formatCertificateLevel(certificateRecord.learning_level)}` : ''}</p>
-                  <label className="form-label" htmlFor="certification-date">Issue date</label>
+                  <label className="form-label" htmlFor="certification-date">Issue date *</label>
                   <input id="certification-date" type="date" className="form-control" required value={certificateForm.certification_date} onChange={(event) => setCertificateForm((current) => ({ ...current, certification_date: event.target.value }))} />
                 </div>
                 <div className="modal-footer">

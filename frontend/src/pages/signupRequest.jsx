@@ -36,7 +36,7 @@ function SignupRequest() {
           <p className="text-secondary">Request an account for the Learning &amp; Development Certification Management System. An administrator will review your details.</p>
           {error && <div className="alert alert-danger" role="alert">{error}</div>}
           {success ? <div className="alert alert-success" role="status">{success}</div> : (
-            <form onSubmit={submit} aria-busy={submitting}>
+            <form id="signup-request-form" onSubmit={submit} aria-busy={submitting}>
               <fieldset disabled={submitting}>
                 {[
                   ['first_name', 'First name', 'text', 100, true, 'given-name'],
@@ -45,18 +45,32 @@ function SignupRequest() {
                   ['phone_number', 'Phone number (optional)', 'tel', 20, false, 'tel'],
                 ].map(([name, label, type, maxLength, required, autoComplete]) => (
                   <div className="mb-2" key={name}>
-                    <label className="form-label" htmlFor={`signup-${name}`}>{label}</label>
-                    <input id={`signup-${name}`} name={name} type={type} className="form-control" value={form[name]} required={required} maxLength={maxLength} autoComplete={autoComplete} onChange={(event) => setForm((current) => ({ ...current, [name]: event.target.value }))} />
+                    <label className="visually-hidden" htmlFor={`signup-${name}`}>{label}</label>
+                    <input id={`signup-${name}`} name={name} type={type} className="form-control" value={form[name]} placeholder={required ? `${label} *` : label} required={required} maxLength={maxLength} autoComplete={autoComplete} onChange={(event) => setForm((current) => ({ ...current, [name]: event.target.value }))} />
                   </div>
                 ))}
-                <label className="form-label" htmlFor="signup-message">Message (optional)</label>
-                <textarea id="signup-message" name="message" className="form-control mb-3" rows={3} maxLength={1000} value={form.message} onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))} />
+                <label className="visually-hidden" htmlFor="signup-message">Message (optional)</label>
+                <textarea id="signup-message" name="message" className="form-control mb-3" placeholder="Message (optional)" rows={3} maxLength={1000} value={form.message} onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))} />
                 <p className="small text-secondary">Your details will be saved for administrator review. Please do not include passwords.</p>
-                <button className="btn btn-success w-100" type="submit">{submitting ? 'Sending request…' : 'Submit request'}</button>
               </fieldset>
             </form>
           )}
-          <div className="text-center mt-3"><Link to="/login">Back to sign in</Link></div>
+          <div className="d-flex justify-content-center gap-3 mt-3">
+            {!success && (
+              <button
+                className="btn rounded-circle signup-request-action"
+                type="submit"
+                form="signup-request-form"
+                disabled={submitting}
+                aria-label={submitting ? 'Sending request' : 'Submit Request'}
+              >
+                {submitting ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <i className="bi bi-send" aria-hidden="true" />}
+              </button>
+            )}
+            <Link className="btn rounded-circle signup-request-action" to="/login" aria-label="Back to sign in">
+              <i className="bi bi-arrow-left" aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </section>
     </main>

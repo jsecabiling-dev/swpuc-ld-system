@@ -1,0 +1,25 @@
+.profile-photo-upload {
+  --profile-photo-crop-max-height: 70dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100dvh;
+  max-width: 840px;
+  padding-block: 1.5rem;
+  text-align: center;
+}
+
+.profile-photo-upload .profile-photo-preview {
+  max-height: 66dvh;
+}
+
+.profile-photo-upload .profile-photo-crop-actions {
+  justify-content: center;
+}
+
+@media (max-width: 480px) {
+  .profile-photo-upload .profile-photo-upload-actions .btn {
+    padding-inline: 0.375rem;
+    font-size: 0.8125rem;
+  }
+}

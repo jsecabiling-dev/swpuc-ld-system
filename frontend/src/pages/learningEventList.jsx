@@ -41,7 +41,7 @@ function SearchableSelect({ id, value, options, onChange, placeholder, disabled,
         className="form-control bg-light text-dark"
         style={{ borderColor: '#cbd5e1' }}
         value={query}
-        placeholder={placeholder}
+        placeholder={required && !disabled ? `${placeholder} *` : placeholder}
         disabled={disabled}
         required={required}
         autoComplete="off"
@@ -609,13 +609,14 @@ function LearningEventList() {
                         {error && <div className="alert alert-danger" role="alert">{error}</div>}
                         <div className="row g-3">
                           <div className="col-12">
+                            <label htmlFor="event-course" className="form-label">Catalog course <span className="text-danger" aria-hidden="true">*</span></label>
                             <div className="input-group">
                               <SearchableSelect id="event-course" value={formData.course_id} onChange={(value) => handleSelectChange('course_id', value)} placeholder={courses.length ? 'Find catalog title' : 'No courses in catalog'} disabled={saving || !courses.length} required options={courses.map((course) => ({ value: String(course.course_id), label: `${course.title}${course.learning_level ? ` · ${course.learning_level}` : ''}` }))} />
                             </div>
                           </div>
                           <div className="col-md-6">
+                            <label htmlFor="event-institution" className="form-label">Institution <span className="text-danger" aria-hidden="true">*</span></label>
                             <div className="input-group">
-                              
                               <SearchableSelect id="event-institution" value={formData.institution_id} onChange={(value) => handleSelectChange('institution_id', value)} placeholder="Find institution" disabled={saving} required options={institutions.map((institution) => ({ value: String(institution.unit_id), label: `${institution.name} (${formatLabel(institution.unit_type)})` }))} />
                             </div>
                           </div>
@@ -634,7 +635,7 @@ function LearningEventList() {
                           <div className="col-md-4">
                             <div className="input-group">
                               <label htmlFor="event-start-date" className="input-group-text bg-light text-secondary" style={{ width: '90px' }}>Start date <span className="text-danger ms-1">*</span></label>
-                              <input id="event-start-date" name="start_date" type="text" className="form-control bg-light text-dark" style={{ borderColor: '#cbd5e1' }} value={formData.start_date} onChange={handleFormChange} placeholder="dd-Mmm-yyyy" pattern="[0-9]{2}-[A-Za-z]{3}-[0-9]{4}" maxLength={11} required disabled={saving} />
+                              <input id="event-start-date" name="start_date" type="text" className="form-control bg-light text-dark" style={{ borderColor: '#cbd5e1' }} value={formData.start_date} onChange={handleFormChange} placeholder="dd-Mmm-yyyy *" pattern="[0-9]{2}-[A-Za-z]{3}-[0-9]{4}" maxLength={11} required disabled={saving} />
                               <span className="input-group-text p-0 position-relative" aria-label="Choose start date">
                                 <i className="bi bi-calendar3 text-secondary px-2" aria-hidden="true" />
                                 <input type="date" aria-label="Choose start date" value={dateApiValue(formData.start_date) || ''} onChange={(event) => handleCalendarChange('start_date', event.target.value)} disabled={saving} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }} />
@@ -652,6 +653,7 @@ function LearningEventList() {
                             </div>
                           </div>
                           <div className="col-md-4">
+                            <label htmlFor="event-delivery-mode" className="form-label">Delivery mode <span className="text-danger" aria-hidden="true">*</span></label>
                             <div className="input-group">
                               <SearchableSelect
                                 id="event-delivery-mode"

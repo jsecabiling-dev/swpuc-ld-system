@@ -61,7 +61,7 @@ export default function ProfilePhotoCrop({ photo, onApply, onCancel, busy }) {
     <section aria-label="Crop photo" className="mb-3">
       <p className="small mb-2">Drag the frame to move it. Drag a side to resize it.</p>
       <div className="position-relative d-inline-block overflow-hidden rounded align-top mb-3">
-        <img ref={image} src={photo} alt="Photo to crop" onLoad={initialize} draggable={false} className="img-fluid d-block" style={{ maxHeight: '52dvh' }} />
+        <img ref={image} src={photo} alt="Photo to crop" onLoad={initialize} draggable={false} className="img-fluid d-block" style={{ maxHeight: 'var(--profile-photo-crop-max-height, 52dvh)' }} />
         {crop && (
           <div
             className="position-absolute border border-2 border-white"
@@ -83,7 +83,7 @@ export default function ProfilePhotoCrop({ photo, onApply, onCancel, busy }) {
           </div>
         )}
       </div>
-      <div className="d-flex gap-2">
+      <div className="d-flex gap-2 profile-photo-crop-actions">
         <button type="button" className="btn btn-success" disabled={!crop || busy} onClick={apply}>Use crop</button>
         <button type="button" className="btn btn-outline-secondary" onClick={onCancel} disabled={busy}>Cancel crop</button>
       </div>

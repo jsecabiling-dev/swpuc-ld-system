@@ -224,7 +224,7 @@ function UserList() {
       suffix: item.suffix || '',
       email: item.email || '',
       phone_number: item.phone_number || '',
-      unit_id: String(item.unit_id),
+      unit_id: String(item.unit_id ?? ''),
     });
     setEditProfilePicture(null);
     setEditProfilePictureError('');
@@ -634,8 +634,8 @@ function UserList() {
                       <div className="row g-3">
                         <div className="col-md-6">
                           <div className="input-group">
-                            <span className="input-group-text bg-light text-secondary" aria-hidden="true" style={{ width: '100px' }}>Firstname</span>
-                            <input id="edit-first-name" name="first_name" type="text" autoComplete="given-name" value={editForm.first_name} onChange={handleEditChange} className="form-control bg-light text-dark" style={{ borderColor: '#cbd5e1' }} placeholder="Enter first name" maxLength={100} required
+                            <span className="input-group-text bg-light text-secondary" aria-hidden="true" style={{ width: '100px' }}>Firstname *</span>
+                            <input id="edit-first-name" name="first_name" type="text" autoComplete="given-name" value={editForm.first_name} onChange={handleEditChange} className="form-control bg-light text-dark" style={{ borderColor: '#cbd5e1' }} placeholder="Enter first name *" maxLength={100} required
                             />
                           </div>
                         </div>
@@ -647,8 +647,8 @@ function UserList() {
                         </div>
                         <div className="col-md-6">
                           <div className="input-group">
-                            <span className="input-group-text bg-light text-secondary" aria-hidden="true" style={{ width: '100px' }}>Lastname</span>
-                            <input id="edit-last-name" name="last_name" type="text" autoComplete="family-name" className="form-control bg-light text-dark" style={{ borderColor: '#cbd5e1' }} placeholder="Enter last name" value={editForm.last_name} onChange={handleEditChange} maxLength={100} required />
+                            <span className="input-group-text bg-light text-secondary" aria-hidden="true" style={{ width: '100px' }}>Lastname *</span>
+                            <input id="edit-last-name" name="last_name" type="text" autoComplete="family-name" className="form-control bg-light text-dark" style={{ borderColor: '#cbd5e1' }} placeholder="Enter last name *" value={editForm.last_name} onChange={handleEditChange} maxLength={100} required />
                           </div>
                         </div>
                         <div className="col-md-6">
@@ -665,14 +665,15 @@ function UserList() {
                         </div>
                         <div className="col-md-6">
                           <div className="input-group">
-                            <span className="input-group-text bg-light text-secondary" aria-hidden="true" style={{ width: '100px' }}>Phone</span>
-                            <input id="edit-phone" name="phone_number" type="tel" autoComplete="tel" className="form-control bg-light text-dark" style={{ borderColor: '#cbd5e1' }} placeholder="Enter phone number" value={editForm.phone_number} onChange={handleEditChange} maxLength={20} required />
+                            <span className="input-group-text bg-light text-secondary" aria-hidden="true" style={{ width: '100px' }}>Phone *</span>
+                            <input id="edit-phone" name="phone_number" type="tel" autoComplete="tel" className="form-control bg-light text-dark" style={{ borderColor: '#cbd5e1' }} placeholder="Enter phone number *" value={editForm.phone_number} onChange={handleEditChange} maxLength={20} required />
                           </div>
                         </div>
                         <div className="col-md-6">
                           <div className="input-group">
-                            <span className="input-group-text bg-light text-secondary" aria-hidden="true" style={{ width: '100px' }}>Institution</span>
+                            <span className="input-group-text bg-light text-secondary" aria-hidden="true" style={{ width: '100px' }}>Institution *</span>
                             <select id="edit-unit" name="unit_id" className="form-select bg-light text-dark" style={{ borderColor: '#cbd5e1' }} value={editForm.unit_id} onChange={handleEditChange} required>
+                              <option value="">Choose an institution *</option>
                               {units.map((unit) => <option key={unit.unit_id} value={unit.unit_id}>{unit.name} ({displayLabel(unit.unit_type)})</option>)}
                             </select>
                           </div>

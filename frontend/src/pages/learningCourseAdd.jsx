@@ -122,12 +122,12 @@ function LearningCourseAdd() {
                 </div>
                 <div className="col-md-3">
                   <label htmlFor="course-level" className="form-label">Learning level <span className="text-danger">*</span></label>
-                  <input id="course-level" name="learning_level" className="form-control" value={formData.learning_level} onChange={handleChange} maxLength={100} placeholder="e.g. Level 1" required disabled={loadingOptions || isSubmitting} />
+                  <input id="course-level" name="learning_level" className="form-control" value={formData.learning_level} onChange={handleChange} maxLength={100} placeholder="e.g. Level 1 *" required disabled={loadingOptions || isSubmitting} />
                 </div>
                 <div className="col-md-3">
                   <label htmlFor="course-department" className="form-label">Hosting department <span className="text-danger">*</span></label>
                   <select id="course-department" name="department_id" className="form-select" value={formData.department_id} onChange={handleChange} required disabled={loadingOptions || isSubmitting || !departments.length}>
-                    <option value="">{loadingOptions ? 'Loading departments...' : 'Choose a department'}</option>
+                    <option value="">{loadingOptions ? 'Loading departments...' : 'Choose a department *'}</option>
                     {departments.map((department) => <option key={department.department_id} value={department.department_id}>{department.name}</option>)}
                   </select>
                 </div>

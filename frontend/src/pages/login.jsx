@@ -110,7 +110,7 @@ function Login() {
                 }}
                 className="form-control bg-light text-dark"
                 style={{ borderColor: '#cbd5e1' }}
-                placeholder="Email address or phone number"
+                placeholder="Email address or phone number *"
                 aria-label="Email address or phone number"
                 required
                 disabled={isBusy}
@@ -135,7 +135,7 @@ function Login() {
                 }}
                 className="form-control bg-light text-dark"
                 style={{ borderColor: '#cbd5e1' }}
-                placeholder="Enter your password"
+                placeholder="Enter your password *"
                 aria-label="Password"
                 required
                 disabled={isBusy}

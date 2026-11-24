@@ -25,6 +25,51 @@
   font-size: 1rem;
 }
 
+.signup-request-card .signup-request-action {
+  --bs-btn-color: var(--bs-secondary);
+  --bs-btn-bg: var(--bs-white);
+  --bs-btn-border-color: var(--bs-gray-300);
+  --bs-btn-hover-color: var(--bs-secondary);
+  --bs-btn-hover-bg: var(--bs-gray-100);
+  --bs-btn-hover-border-color: var(--bs-gray-300);
+  --bs-btn-active-color: var(--bs-secondary);
+  --bs-btn-active-bg: var(--bs-gray-200);
+  --bs-btn-active-border-color: var(--bs-gray-300);
+  --bs-btn-disabled-color: var(--bs-secondary);
+  --bs-btn-disabled-bg: var(--bs-white);
+  --bs-btn-disabled-border-color: var(--bs-gray-300);
+  --bs-btn-focus-shadow-rgb: var(--bs-secondary-rgb);
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  font-size: 1.125rem;
+}
+
+.signup-request-action::after {
+  position: absolute;
+  bottom: calc(100% + 0.375rem);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--bs-border-radius);
+  background: var(--bs-dark);
+  color: var(--bs-white);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  visibility: hidden;
+  content: attr(aria-label);
+}
+
+.signup-request-action:hover::after,
+.signup-request-action:focus-visible::after {
+  visibility: visible;
+}
+
 @media (max-width: 767.98px) {
   .signup-request-page {
     padding: 0.75rem 0.75rem calc(1rem + env(safe-area-inset-bottom, 0px));
@@ -39,8 +84,4 @@
     font-size: 1.2rem;
   }
 
-  .signup-request-card .form-label,
-  .signup-request-card .btn {
-    font-size: 0.8125rem;
-  }
 }
