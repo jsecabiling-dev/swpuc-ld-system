@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import CommunityProfileAvatar from '../components/CommunityProfileAvatar';
+import './mentorDetail.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem('ld_cert_token') || ''}` });
@@ -111,7 +112,7 @@ function MentorDetail() {
   };
 
   return (
-    <div className="min-vh-100 bg-light d-flex flex-column">
+    <div className="community-detail-page mentor-detail-page min-vh-100 bg-light d-flex flex-column">
       <BrandHeader />
       <main className="container py-4 flex-grow-1">
         <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -127,7 +128,7 @@ function MentorDetail() {
           : mentor && <>
             <section className="card border-0 shadow-sm mb-4">
               <div className="card-body p-4">
-                <div className="d-flex flex-column flex-md-row align-items-md-start gap-4">
+                <div className="mentor-profile-layout d-flex flex-column flex-md-row align-items-md-start gap-4">
                   <CommunityProfileAvatar key={`${mentor.user_id}-${mentor.profilepict || ''}`} person={mentor} size="6rem" />
                   <div className="flex-grow-1">
                     <h2 className="h5 fw-bold mb-3">Mentor Profile</h2>
@@ -145,10 +146,10 @@ function MentorDetail() {
               <div className="card-body p-4">
                 <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
                   <div><h2 className="h5 fw-bold mb-1">Learning Courses</h2><p className="text-secondary mb-0">Courses this mentor is assigned to teach.</p></div>
-                  {canEditCourses && <button className="btn btn-success" type="button" onClick={openAddCourses}><i className="bi bi-plus-lg me-2" aria-hidden="true" />Add Courses</button>}
+                  {canEditCourses && <button className="btn btn-success d-none d-md-inline-flex" type="button" onClick={openAddCourses}><i className="bi bi-plus-lg me-2" aria-hidden="true" />Add Courses</button>}
                 </div>
-                {courses.length ? <div className="table-responsive"><table className="table table-hover align-middle mb-0"><caption className="visually-hidden">Courses assigned to {fullName(mentor)}</caption><thead className="table-light"><tr><th scope="col" className="text-nowrap text-center">ID No</th><th>Course</th><th>Level</th><th>Department</th>{canEditCourses && <th className="text-center">Actions</th>}</tr></thead><tbody>
-                  {[...courses].sort((a, b) => Number(b.course_id) - Number(a.course_id)).map((course) => <tr key={course.course_id}><td className="text-nowrap text-center">{course.course_id}</td><td className="fw-semibold">{course.title}</td><td>{course.learning_level || '—'}</td><td>{course.department_name || '—'}</td>{canEditCourses && <td className="text-center"><button className="btn btn-sm btn-outline-secondary" type="button" onClick={() => removeCourse(course)} aria-label={`Remove ${course.title} assignment`}><i className="bi bi-trash text-secondary" aria-hidden="true" /></button></td>}</tr>)}
+                {courses.length ? <div className="table-responsive"><table className="table table-hover align-middle mb-0"><caption className="visually-hidden">Courses assigned to {fullName(mentor)}</caption><thead className="table-light"><tr><th scope="col" className="text-nowrap text-center">ID No</th><th>Course</th><th>Level</th><th>Department</th>{canEditCourses && <th className="mentor-course-actions text-center">Actions</th>}</tr></thead><tbody>
+                  {[...courses].sort((a, b) => Number(b.course_id) - Number(a.course_id)).map((course) => <tr key={course.course_id}><td className="text-nowrap text-center">{course.course_id}</td><td className="fw-semibold">{course.title}</td><td>{course.learning_level || '—'}</td><td>{course.department_name || '—'}</td>{canEditCourses && <td className="mentor-course-actions text-center"><button className="btn btn-sm btn-outline-secondary" type="button" onClick={() => removeCourse(course)} aria-label={`Remove ${course.title} assignment`}><i className="bi bi-trash text-secondary" aria-hidden="true" /></button></td>}</tr>)}
                 </tbody></table></div> : <p className="text-secondary text-center py-4 mb-0">No courses are assigned to this mentor yet.</p>}
               </div>
             </section>

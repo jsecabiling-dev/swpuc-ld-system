@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import SiteFooter from '../components/SiteFooter';
 import sdaLogoGreen from './thumbnails/sda_logo_green.png';
+import './login.css';
 
 function formatFullName(firstName, middleName, lastName, suffix) {
   const first = firstName?.trim() || '';
@@ -59,9 +60,9 @@ function Login() {
   const isBusy = authLoading || submitting;
 
   return (
-    <main className="container d-flex justify-content-center align-items-center min-vh-100 py-4">
+    <main className="login-page container d-flex justify-content-center align-items-center min-vh-100 py-4">
       <section
-        className="card bg-white shadow-sm p-4 rounded-3 position-relative"
+        className="login-card card bg-white shadow-sm p-4 rounded-3 position-relative"
         aria-labelledby="login-title"
         style={{
           border: '1px solid #e3e8ed',
@@ -73,8 +74,7 @@ function Login() {
           <img
             src={sdaLogoGreen}
             alt="Southwestern Philippine Union Conference"
-            className="img-fluid mb-3"
-            style={{ maxHeight: '100px' }}
+            className="login-logo img-fluid mb-3"
           />
           <p className="text-muted mb-1">Southwestern Philippine Union Conference</p>
           <h1
@@ -110,7 +110,8 @@ function Login() {
                 }}
                 className="form-control bg-light text-dark"
                 style={{ borderColor: '#cbd5e1' }}
-                placeholder="Enter your email address or phone number"
+                placeholder="Email address or phone number"
+                aria-label="Email address or phone number"
                 required
                 disabled={isBusy}
               />
@@ -135,6 +136,7 @@ function Login() {
                 className="form-control bg-light text-dark"
                 style={{ borderColor: '#cbd5e1' }}
                 placeholder="Enter your password"
+                aria-label="Password"
                 required
                 disabled={isBusy}
               />
@@ -145,7 +147,6 @@ function Login() {
             <button
               type="submit"
               className="btn login-submit-button rounded-circle d-inline-flex align-items-center justify-content-center p-0"
-              style={{ width: '3.5rem', height: '3.5rem' }}
               aria-label={submitting ? 'Signing in' : 'Sign in'}
               title={submitting ? 'Signing in' : 'Sign in'}
               disabled={isBusy}
@@ -163,6 +164,10 @@ function Login() {
             </button>
           </div>
         </form>
+
+        <div className="text-center">
+          <Link className="login-signup-link" to="/signup-request">Signup Request</Link>
+        </div>
 
         <SiteFooter />
       </section>

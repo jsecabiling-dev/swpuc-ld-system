@@ -22,7 +22,7 @@ router.post('/login', async (req, res) => {
         const query = `
             SELECT u.*, o.name AS unit_name, ${unitTypeLabelSql('o.unit_type')} AS unit_type
             FROM users u
-            JOIN organizational_units o ON u.unit_id = o.unit_id
+            LEFT JOIN organizational_units o ON u.unit_id = o.unit_id
             WHERE (u.email = ? OR u.phone_number = ?) AND u.is_active = TRUE
         `;
         
@@ -174,7 +174,7 @@ router.post('/change-password', async (req, res) => {
                     u.can_add_progress, u.can_edit_progress, u.can_delete_progress,
                     o.name AS unit_name, ${unitTypeLabelSql('o.unit_type')} AS unit_type
              FROM users u
-             JOIN organizational_units o ON o.unit_id = u.unit_id
+             LEFT JOIN organizational_units o ON o.unit_id = u.unit_id
              WHERE u.user_id = ? AND u.is_active = TRUE`,
             [payload.userId]
         );

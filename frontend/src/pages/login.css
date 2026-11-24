@@ -1,0 +1,110 @@
+.login-logo {
+  max-height: 100px;
+}
+
+.login-signup-link {
+  color: #6c757d;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  text-underline-offset: 0.2em;
+}
+
+.login-signup-link:hover,
+.login-signup-link:focus-visible {
+  color: #495057;
+  text-decoration: none;
+}
+
+.login-page .login-submit-button {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+@media (max-width: 575.98px) {
+  .login-page {
+    min-height: 100svh !important;
+    padding: 1rem !important;
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .login-page .login-card {
+    max-width: 360px !important;
+    min-width: 0;
+    padding: 1.25rem !important;
+    margin-block: auto;
+  }
+
+  .login-card header {
+    margin-bottom: 1.25rem !important;
+  }
+
+  .login-card .login-logo {
+    max-height: 72px;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .login-card header p {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .login-card #login-title {
+    font-size: 1.05rem !important;
+    line-height: 1.3;
+  }
+
+  .login-card .input-group {
+    flex-wrap: nowrap;
+  }
+
+  .login-card .form-control {
+    min-width: 0;
+    min-height: 44px;
+    /* Keep input text legible and avoid focus zoom on mobile browsers. */
+    font-size: 1rem;
+    padding-inline: 0.5rem;
+  }
+
+  .login-card .form-control::placeholder {
+    font-size: 0.75rem;
+  }
+
+  .login-card .input-group-text {
+    padding-inline: 0.625rem;
+  }
+
+  .login-card .alert {
+    font-size: 0.85rem;
+    padding: 0.625rem;
+    overflow-wrap: anywhere;
+  }
+
+  .login-card form > .text-center {
+    margin-top: 1rem !important;
+  }
+
+  .login-page .login-submit-button {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .login-card .site-footer {
+    padding: 0.5rem 0 0 !important;
+    overflow-wrap: anywhere;
+  }
+
+}
+
+/* On short phone screens, let the card scroll naturally instead of clipping. */
+@media (max-width: 767.98px) and (max-height: 500px) {
+  .login-page {
+    min-height: 100svh !important;
+    height: auto;
+    align-items: flex-start !important;
+  }
+}

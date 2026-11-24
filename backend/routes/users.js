@@ -3,11 +3,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const fs = require('fs/promises');
-const os = require('os');
+const { isValidEmail, sendCredentialEmail } = require('../utils/credentialEmail');
 const path = require('path');
 const db = require('../config/db');
 const { unitTypeLabelSql } = require('../utils/unitTypeCodes');
-const { PERMISSIONS, requirePermission, requireAnyPermission } = require('../middleware/permissions');
+const { PERMISSIONS, requirePermission } = require('../middleware/permissions');
 
 const router = express.Router();
 const MAX_PROFILE_PICTURE_BYTES = 5 * 1024 * 1024;
@@ -15,11 +15,6 @@ const profilePicturesDirectory = path.resolve(
     __dirname,
     '..',
     process.env.PROFILE_PICTURES_DIR || '../resources'
-);
-const credentialDirectory = path.resolve(
-    __dirname,
-    '..',
-    process.env.NEW_USER_CREDENTIALS_DIR || '../temp/user-credentials'
 );
 
 function decodeProfilePicture(picture) {
@@ -82,51 +77,6 @@ async function writeProfilePictureFile(picture) {
     return filePath;
 }
 
-function filenameNamePart(name) {
-    const letters = name
-        .normalize('NFKD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^A-Za-z]/g, '')
-        .slice(0, 3)
-        .toUpperCase();
-    return letters || 'USR';
-}
-
-async function saveTemporaryPasswordFile(user, password) {
-    await fs.mkdir(credentialDirectory, { recursive: true, mode: 0o700 });
-    const filename = `${filenameNamePart(user.last_name)}${filenameNamePart(user.first_name)}${password.slice(0, 5)}-${user.user_id}.txt`;
-    const filePath = path.join(credentialDirectory, filename);
-    const credentialText = [
-        'TRAINING CERTIFICATION MANAGEMENT SYSTEM',
-        'TEMPORARY USER CREDENTIAL',
-        `User ID: ${user.user_id}`,
-        `Name: ${[user.first_name, user.middle_name, user.last_name, user.suffix].filter(Boolean).join(' ')}`,
-        `Email: ${user.email || 'Not provided'}`,
-        `Cellphone Number: ${user.phone_number || 'Not provided'}`,
-        `Temporary Password: ${password}`,
-        'Change this password immediately after first login.',
-        `Generated: ${new Date().toISOString()}`,
-        '',
-        'Share this password securely and delete this file after it has been delivered.'
-    ].join(os.EOL);
-
-    await fs.writeFile(filePath, credentialText, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
-    return filePath;
-}
-
-async function removePreviousCredentialFiles(userId, keepPath) {
-    try {
-        const filenames = await fs.readdir(credentialDirectory);
-        await Promise.all(filenames
-            .filter((filename) => filename.endsWith(`-${userId}.txt`))
-            .map((filename) => path.join(credentialDirectory, filename))
-            .filter((filePath) => filePath !== keepPath)
-            .map((filePath) => fs.unlink(filePath).catch(() => {})));
-    } catch {
-        // Cleanup is best-effort; it must not undo a successful password reset.
-    }
-}
-
 async function removeStoredProfilePicture(filename) {
     if (!/^profile-[0-9a-f-]{36}\.(?:jpg|png|gif|webp)$/i.test(filename || '')) return;
     await fs.unlink(path.join(profilePicturesDirectory, filename)).catch(() => {});
@@ -179,15 +129,174 @@ const requireUserAdd = requirePermission('users.add');
 const requireUserEdit = requirePermission('users.edit');
 const requireUserDelete = requirePermission('users.delete');
 
+function requireOwnProfileOrUserEdit(req, res, next) {
+    if (Number(req.params.id) === Number(req.auth.user_id)) return next();
+    return requireUserEdit(req, res, next);
+}
+
+const photoUploads = new Map();
+const PHOTO_UPLOAD_TTL = 5 * 60 * 1000;
+const MOBILE_PHOTO_LIMIT = 256 * 1024;
+
+function closePhotoUpload(id, upload) {
+    clearTimeout(upload.timer);
+    photoUploads.delete(id);
+}
+
+router.put('/profile-photo-upload', express.raw({ type: 'image/jpeg', limit: MOBILE_PHOTO_LIMIT }), (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    const [id, secret] = (req.get('X-Photo-Upload') || '').split('.');
+    const upload = photoUploads.get(id);
+    if (!upload || upload.secret !== secret || Date.now() >= upload.expiresAt) {
+        return res.status(410).json({ message: 'This photo link has expired. Generate a new QR code.' });
+    }
+    if (upload.photo) return res.json({ success: true });
+    if (!Buffer.isBuffer(req.body) || req.body.length > MOBILE_PHOTO_LIMIT) {
+        return res.status(400).json({ message: 'Choose a JPEG photo up to 256 KB.' });
+    }
+    try {
+        upload.photo = decodeProfilePicture({ data: req.body.toString('base64'), mime_type: 'image/jpeg' }).buffer;
+        res.json({ success: true });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
 router.use(authenticateToken);
 
-router.get('/options', requireAnyPermission('users.add', 'users.edit'), async (req, res, next) => {
+router.post('/:id/profile-photo-uploads', requireOwnProfileOrUserEdit, (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    const owner = req.auth.active_session_id;
+    if (photoUploads.size >= 128) {
+        return res.status(503).json({ message: 'Photo uploads are busy. Try again shortly.' });
+    }
+    const id = crypto.randomUUID();
+    const secret = crypto.randomBytes(32).toString('base64url');
+    const expiresAt = Date.now() + PHOTO_UPLOAD_TTL;
+    const upload = { owner, userId: req.params.id, secret, expiresAt, photo: null };
+    upload.timer = setTimeout(() => closePhotoUpload(id, upload), PHOTO_UPLOAD_TTL);
+    upload.timer.unref();
+    photoUploads.set(id, upload);
+    res.status(201).json({ id, token: `${id}.${secret}` });
+});
+
+router.route('/:id/profile-photo-uploads/:uploadId').all(requireOwnProfileOrUserEdit, (req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    const upload = photoUploads.get(req.params.uploadId);
+    if (!upload || upload.owner !== req.auth.active_session_id || upload.userId !== req.params.id || Date.now() >= upload.expiresAt) {
+        return res.status(410).json({ message: 'This photo link has expired. Generate a new QR code.' });
+    }
+    req.photoUpload = upload;
+    next();
+}).get((req, res) => {
+    if (!req.photoUpload.photo) return res.sendStatus(204);
+    res.type('jpeg').send(req.photoUpload.photo);
+}).delete((req, res) => {
+    closePhotoUpload(req.params.uploadId, req.photoUpload);
+    res.sendStatus(204);
+});
+
+router.get('/signup-requests/count', requireUserAdd, async (req, res) => {
+    try {
+        const [rows] = await db.execute("SELECT COUNT(*) AS pending_count FROM signup_requests WHERE status IN ('pending', 'reviewed')");
+        res.json({ success: true, pending_count: Number(rows[0].pending_count) });
+    } catch {
+        res.status(503).json({ success: false, message: 'Could not load the signup request count.' });
+    }
+});
+
+router.get('/signup-requests', requireUserAdd, async (req, res) => {
+    const page = Number(req.query.page || 1);
+    if (!Number.isSafeInteger(page) || page < 1 || page > 1000000) {
+        return res.status(400).json({ success: false, message: 'Invalid page.' });
+    }
+    try {
+        const [counts] = await db.execute('SELECT COUNT(*) AS total FROM signup_requests');
+        const [requests] = await db.execute(
+            `SELECT request_id, first_name, last_name, email, phone_number, message, status, created_at, created_user_id
+             FROM signup_requests ORDER BY created_at DESC, request_id DESC LIMIT 50 OFFSET ${(page - 1) * 50}`
+        );
+        res.json({ success: true, data: requests, total: Number(counts[0].total), page, page_size: 50 });
+    } catch {
+        res.status(503).json({ success: false, message: 'Could not load signup requests. Check that the signup requests database migration has been applied.' });
+    }
+});
+
+router.patch('/signup-requests/:id', requireUserAdd, async (req, res) => {
+    const id = Number(req.params.id);
+    const status = req.body?.status;
+    if (!Number.isSafeInteger(id) || id < 1 || !['pending', 'reviewed', 'dismissed'].includes(status)) {
+        return res.status(400).json({ success: false, message: 'Invalid request or status.' });
+    }
+    try {
+        const [rows] = await db.execute('SELECT request_id, status FROM signup_requests WHERE request_id = ?', [id]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'Signup request not found.' });
+        if (rows[0].status === 'created') return res.status(409).json({ success: false, message: 'This request already has an account.' });
+        const [result] = await db.execute('UPDATE signup_requests SET status = ?, reviewed_at = IF(? = \'pending\', NULL, CURRENT_TIMESTAMP) WHERE request_id = ? AND status <> \'created\'', [status, status, id]);
+        if (!result.affectedRows) return res.status(409).json({ success: false, message: 'The request changed. Reload the list before trying again.' });
+        res.json({ success: true, message: 'Request status updated.' });
+    } catch {
+        res.status(503).json({ success: false, message: 'Could not update this signup request.' });
+    }
+});
+
+router.post('/signup-requests/:id/create-user', requireUserAdd, async (req, res, next) => {
+    const requestId = Number(req.params.id);
+    if (!Number.isSafeInteger(requestId) || requestId < 1) {
+        return res.status(400).json({ success: false, message: 'Invalid signup request.' });
+    }
+    let connection;
+    try {
+        connection = await db.getConnection();
+        await connection.beginTransaction();
+        const [requests] = await connection.execute('SELECT * FROM signup_requests WHERE request_id = ? FOR UPDATE', [requestId]);
+        if (!requests.length) {
+            await connection.rollback();
+            return res.status(404).json({ success: false, message: 'Signup request not found.' });
+        }
+        const request = requests[0];
+        if (request.status === 'created' || request.created_user_id || request.status === 'dismissed') {
+            await connection.rollback();
+            return res.status(409).json({ success: false, message: request.status === 'dismissed' ? 'Reopen this dismissed request before creating an account.' : 'An account has already been created from this request.' });
+        }
+        if (!isValidEmail(request.email)) {
+            await connection.rollback();
+            return res.status(400).json({ success: false, message: 'A valid request email address is required.' });
+        }
+        const [existing] = await connection.execute('SELECT user_id FROM users WHERE email = ? OR (phone_number = ? AND ? IS NOT NULL)', [request.email, request.phone_number || null, request.phone_number || null]);
+        if (existing.length) {
+            await connection.rollback();
+            return res.status(409).json({ success: false, message: 'A user with this email address or phone number already exists. Review their account in Users.' });
+        }
+        const password = crypto.randomBytes(9).toString('base64url');
+        const hash = await bcrypt.hash(password, 12);
+        const [result] = await connection.execute(
+            `INSERT INTO users (first_name, last_name, email, phone_number, password_hash, unit_id, is_active, must_change_password,
+                ${PERMISSIONS.map((permission) => permission.column).join(', ')})
+             VALUES (?, ?, ?, ?, ?, NULL, TRUE, TRUE, ${PERMISSIONS.map(() => 'FALSE').join(', ')})`,
+            [request.first_name, request.last_name, request.email, request.phone_number || null, hash]
+        );
+        await connection.execute("UPDATE signup_requests SET status = 'created', created_user_id = ?, reviewed_at = CURRENT_TIMESTAMP WHERE request_id = ?", [result.insertId, requestId]);
+        await sendCredentialEmail(request, password);
+        await connection.commit();
+        res.status(201).json({ success: true, user_id: result.insertId, credential_email: request.email, message: `Account created. Temporary sign-in credentials were emailed to ${request.email}.` });
+    } catch (error) {
+        if (connection) await connection.rollback().catch(() => {});
+        if (error.code === 'CREDENTIAL_EMAIL_ERROR') return res.status(error.status).json({ success: false, message: error.message });
+        if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ success: false, message: 'That email address or phone number is already registered.' });
+        next(error);
+    } finally {
+        if (connection) connection.release();
+    }
+});
+
+router.get('/options', async (req, res, next) => {
     try {
         const [units] = await db.execute(
             `SELECT unit_id, name, ${unitTypeLabelSql('unit_type')} AS unit_type FROM organizational_units ORDER BY name`
         );
 
-        res.json({ success: true, data: { units, permissions: PERMISSIONS } });
+        res.json({ success: true, data: { units, permissions: req.auth.can_edit_users ? PERMISSIONS : [] } });
     } catch (error) {
         next(error);
     }
@@ -228,7 +337,7 @@ const USER_LIST_QUERY = `
            u.email, u.phone_number, u.profilepict,
            u.unit_id, o.name AS unit_name, ${unitTypeLabelSql('o.unit_type')} AS unit_type, u.is_active, u.created_at
     FROM users u
-    JOIN organizational_units o ON o.unit_id = u.unit_id
+    LEFT JOIN organizational_units o ON o.unit_id = u.unit_id
 `;
 
 router.get('/', async (req, res, next) => {
@@ -257,7 +366,7 @@ router.get('/:id', async (req, res, next) => {
     }
 });
 
-router.put('/:id', requireUserEdit, async (req, res, next) => {
+router.put('/:id', requireOwnProfileOrUserEdit, async (req, res, next) => {
     const userId = Number(req.params.id);
     const body = req.body || {};
     const firstName = typeof body.first_name === 'string' ? body.first_name.trim() : '';
@@ -406,8 +515,6 @@ router.post('/:id/reset-password', requireUserEdit, async (req, res, next) => {
     }
 
     let connection;
-    let credentialFilePath;
-    let credentialFileCreated = false;
     try {
         connection = await db.getConnection();
         await connection.beginTransaction();
@@ -422,138 +529,28 @@ router.post('/:id/reset-password', requireUserEdit, async (req, res, next) => {
         }
 
         const targetUser = users[0];
+        if (!isValidEmail(targetUser.email)) {
+            await connection.rollback();
+            return res.status(400).json({ success: false, message: 'Add a valid email address to this user before resetting their password.' });
+        }
         const temporaryPassword = crypto.randomBytes(9).toString('base64url');
         const passwordHash = await bcrypt.hash(temporaryPassword, 12);
         await connection.execute(
-            'UPDATE users SET password_hash = ?, must_change_password = TRUE WHERE user_id = ?',
+            'UPDATE users SET password_hash = ?, must_change_password = TRUE, active_session_id = NULL WHERE user_id = ?',
             [passwordHash, userId]
         );
-        credentialFilePath = await saveTemporaryPasswordFile(targetUser, temporaryPassword);
-        credentialFileCreated = true;
+        await sendCredentialEmail(targetUser, temporaryPassword, { reset: true });
         await connection.commit();
 
-        await removePreviousCredentialFiles(userId, credentialFilePath);
         res.json({
             success: true,
-            message: 'Temporary password generated. The user must change it at next sign-in.',
-            credential_file: credentialFilePath
+            message: 'Temporary password emailed. The user must change it at next sign-in.',
+            credential_email: targetUser.email
         });
     } catch (error) {
         if (connection) await connection.rollback().catch(() => {});
-        if (credentialFileCreated) await fs.unlink(credentialFilePath).catch(() => {});
-        next(error);
-    } finally {
-        if (connection) connection.release();
-    }
-});
-
-router.post('/', requireUserAdd, async (req, res, next) => {
-    let connection;
-    let credentialFilePath;
-    let credentialFileCreated = false;
-    let profilePicturePath;
-    let profilePictureCreated = false;
-    const body = req.body || {};
-    const firstName = typeof body.first_name === 'string' ? body.first_name.trim() : '';
-    const middleName = typeof body.middle_name === 'string' ? body.middle_name.trim() : '';
-    const lastName = typeof body.last_name === 'string' ? body.last_name.trim() : '';
-    const suffix = typeof body.suffix === 'string' ? body.suffix.trim() : '';
-    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
-    const phoneNumber = typeof body.phone_number === 'string' ? body.phone_number.trim() : '';
-    const unitId = Number(body.unit_id);
-
-    if (!firstName || !lastName || !phoneNumber || !unitId) {
-        return res.status(400).json({ success: false, message: 'Fill in all required fields.' });
-    }
-    if (firstName.length > 100 || middleName.length > 100 || lastName.length > 100) {
-        return res.status(400).json({ success: false, message: 'Names must be 100 characters or fewer.' });
-    }
-    if (suffix.length > 20) {
-        return res.status(400).json({ success: false, message: 'Name suffix must be 20 characters or fewer.' });
-    }
-    if (phoneNumber.length > 20) {
-        return res.status(400).json({ success: false, message: 'Phone number must be 20 characters or fewer.' });
-    }
-    if (email.length > 150 || (email && !/^\S+@\S+\.\S+$/.test(email))) {
-        return res.status(400).json({ success: false, message: 'Enter a valid email address (150 characters maximum).' });
-    }
-    if (!Number.isSafeInteger(unitId)) {
-        return res.status(400).json({ success: false, message: 'Choose a valid institution.' });
-    }
-
-    let profilePicture;
-    try {
-        profilePicture = decodeProfilePicture(body.profile_picture);
-    } catch (error) {
-        return res.status(error.status || 400).json({ success: false, message: error.message });
-    }
-
-    try {
-        connection = await db.getConnection();
-        const [unitRows] = await connection.execute('SELECT name FROM organizational_units WHERE unit_id = ?', [unitId]);
-        if (!unitRows.length) {
-            return res.status(400).json({ success: false, message: 'Choose a valid institution.' });
-        }
-
-        const password = crypto.randomBytes(9).toString('base64url');
-        const passwordHash = await bcrypt.hash(password, 12);
-        await connection.beginTransaction();
-        const [result] = await connection.execute(
-            `INSERT INTO users
-                (first_name, middle_name, last_name, suffix, email, phone_number, password_hash, unit_id, profilepict, is_active, must_change_password)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, TRUE, TRUE)`,
-            [
-                firstName,
-                middleName || null,
-                lastName,
-                suffix || null,
-                email || null,
-                phoneNumber,
-                passwordHash,
-                unitId,
-                profilePicture?.filename || null
-            ]
-        );
-
-        if (profilePicture) {
-            profilePicturePath = await writeProfilePictureFile(profilePicture);
-            profilePictureCreated = true;
-        }
-
-        credentialFilePath = await saveTemporaryPasswordFile({
-            user_id: result.insertId,
-            first_name: firstName,
-            middle_name: middleName,
-            last_name: lastName,
-            suffix,
-            email,
-            phone_number: phoneNumber
-        }, password);
-        credentialFileCreated = true;
-        await connection.commit();
-
-        res.status(201).json({
-            success: true,
-            message: 'User created successfully.',
-            credential_file: credentialFilePath,
-            data: {
-                user_id: result.insertId,
-                first_name: firstName,
-                middle_name: middleName,
-                last_name: lastName,
-                suffix,
-                email: email || null,
-                phone_number: phoneNumber,
-                profilepict: profilePicture?.filename || '',
-                unit: unitRows[0].name
-            }
-        });
-    } catch (error) {
-        if (connection) await connection.rollback().catch(() => {});
-        if (credentialFileCreated) await fs.unlink(credentialFilePath).catch(() => {});
-        if (profilePictureCreated) await fs.unlink(profilePicturePath).catch(() => {});
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ success: false, message: 'That email address or phone number is already registered.' });
+        if (error.code === 'CREDENTIAL_EMAIL_ERROR') {
+            return res.status(error.status).json({ success: false, message: error.message });
         }
         next(error);
     } finally {

@@ -1,28 +1,30 @@
+import QRCode from 'qrcode';
 import { formatShortDate } from './dateFormat';
+import { certificateVerificationUrl, formatCertificateLevel } from './certificateVerification';
 import sdaLogoGreen from '../pages/thumbnails/sda_logo_green.png';
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
 }
 
-function formatCertificateLevel(value) {
-  const level = String(value || '').trim();
-  if (!level) return '';
-  const numericLevel = level.match(/^(?:level\s*)?(\d+)$/i);
-  if (numericLevel) return Number(numericLevel[1]) > 0 ? `Level ${Number(numericLevel[1])}` : '';
-  return level;
-}
-
-export function printCertificate(record, recipientName, onPopupBlocked = () => {}) {
+export async function printCertificate(record, recipientName, onPopupBlocked = () => {}) {
   const printWindow = window.open('', '_blank', 'width=900,height=700');
   if (!printWindow) {
     onPopupBlocked();
     return;
   }
 
-  const qrImage = record.certificate_verification_code
-    ? `<div class="qr"><img alt="Certificate verification QR code" src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(record.certificate_verification_code)}"></div>`
-    : '';
+  let qrImage = '';
+  if (record.certificate_verification_code) {
+    try {
+      const url = certificateVerificationUrl(record.certificate_verification_code);
+      const image = await QRCode.toDataURL(url, { width: 320 });
+      qrImage = `<div class="qr"><a href="${escapeHtml(url)}"><img alt="Verify certificate online" src="${image}"></a></div>`;
+    } catch {
+      printWindow.document.body.textContent = 'Could not generate the certificate verification QR code.';
+      return;
+    }
+  }
   const courseTitle = record.event_name || record.course_title || 'Learning event';
   const courseLevel = formatCertificateLevel(record.learning_level || record.course_level);
   const programTitle = courseLevel && !courseTitle.toLowerCase().includes(courseLevel.toLowerCase())

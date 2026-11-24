@@ -1,0 +1,344 @@
+.signup-review-page .signup-review-status {
+  min-width: 120px;
+}
+
+@media (max-width: 767.98px) {
+  .user-accounts-page .modal-body dl.row {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 0.625rem;
+    row-gap: 0.25rem;
+    margin-inline: 0;
+    line-height: 1.3;
+  }
+
+  .user-accounts-page .modal-body dl.row > dt,
+  .user-accounts-page .modal-body dl.row > dd {
+    width: auto;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .mentor-list-page .table tr > :nth-child(1),
+  .mentor-list-page .table tr > :nth-child(3),
+  .mentor-list-page .table tr > :nth-child(4),
+  .mentor-list-page .table tr > :nth-child(5),
+  .mentor-list-page .table td:last-child button,
+  .certifier-list-page .table tr > :nth-child(1),
+  .certifier-list-page .table tr > :nth-child(3),
+  .certifier-list-page .table tr > :nth-child(4),
+  .certifier-list-page .table tr > :nth-child(5),
+  .certifier-list-page .table td:last-child button {
+    display: none !important;
+  }
+
+  .mentor-list-page .table td:last-child,
+  .certifier-list-page .table td:last-child {
+    width: 48px;
+  }
+
+  .learner-list-page .table tr > :nth-child(1),
+  .learner-list-page .table tr > :nth-child(3),
+  .learner-list-page .table tr > :nth-child(4) {
+    display: none;
+  }
+
+  .learner-list-page .table td:last-child {
+    width: 48px;
+  }
+
+  .users-page.min-vh-100 {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 0 !important;
+  }
+
+  .users-page > nav {
+    flex-shrink: 0;
+  }
+
+  .users-page.min-vh-100 > main.container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    max-width: none;
+    padding: 0.75rem !important;
+  }
+
+  .users-page main > .card {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .users-page main > .card > .card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .users-page main > .d-flex,
+  .users-page main > .alert {
+    flex-shrink: 0;
+  }
+
+  .users-page main > .card > .card-body > :not(.table-responsive) {
+    flex-shrink: 0;
+  }
+
+  .users-page main > .card > .card-body > .table-responsive {
+    flex: 1;
+    min-height: 0;
+    max-height: none;
+    width: 100%;
+    overflow-y: auto;
+    padding-bottom: 1rem;
+    scroll-padding-bottom: 1rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .users-page .table {
+    width: 100%;
+  }
+
+  .users-page > .site-footer {
+    position: relative;
+    inset: auto;
+    flex-shrink: 0;
+    margin-top: 0 !important;
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .user-accounts-page .table tr > :nth-child(1),
+  .user-accounts-page .table tr > :nth-child(3),
+  .user-accounts-page .table tr > :nth-child(4),
+  .user-accounts-page .table tr > :nth-child(5),
+  .user-accounts-page .table td:last-child > button:not(.users-view-button) {
+    display: none;
+  }
+
+  .user-accounts-page .table td:last-child {
+    width: 48px;
+  }
+
+  .learner-list-page .learner-list-heading {
+    gap: 0.375rem !important;
+  }
+
+  .users-page > main.container {
+    padding: 1rem 0.75rem 5rem !important;
+    min-width: 0;
+    font-size: 0.8125rem;
+  }
+
+  .users-page main .users-title {
+    font-size: 1.05rem;
+  }
+
+  .users-page main .users-eyebrow {
+    font-size: 0.625rem;
+  }
+
+  .users-page .users-add-button {
+    display: none;
+  }
+
+  .users-page .users-status-filter {
+    display: none;
+  }
+
+  .users-page .table {
+    --bs-table-border-color: #e9ecef;
+  }
+
+  .users-page .table > :not(caption) > * > * {
+    border-bottom-width: 0.5px;
+  }
+
+  .users-page main > .d-flex {
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .users-page main .btn {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.5rem;
+    min-height: 32px;
+  }
+
+  .users-page main .card-body {
+    padding: 0.75rem;
+  }
+
+  .users-page main .row {
+    --bs-gutter-x: 0.75rem;
+    --bs-gutter-y: 0.625rem;
+  }
+
+  /* Retain 16px input text so focusing fields does not zoom the phone page. */
+  .users-page main .form-control,
+  .users-page main .form-select {
+    min-width: 0;
+    min-height: 36px;
+    font-size: 1rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .users-page main .form-control::placeholder {
+    font-size: 0.75rem;
+  }
+
+  .users-page main .form-select {
+    padding-right: 2rem;
+  }
+
+  .signup-review-page main .signup-review-status {
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 30px;
+    padding: 0.2rem 1.3rem 0.2rem 0.35rem;
+    font-size: 0.75rem;
+    background-position: right 0.3rem center;
+    background-size: 12px 9px;
+  }
+
+  .users-page main .alert {
+    font-size: 0.8125rem;
+    padding: 0.625rem;
+    overflow-wrap: anywhere;
+  }
+
+  .users-page .user-list-scroll {
+    max-width: 100%;
+    overscroll-behavior-x: contain;
+  }
+
+  .users-page .table {
+    font-size: 0.75rem;
+  }
+
+  .users-page .table > :not(caption) > * > * {
+    padding: 0.4rem 0.35rem;
+  }
+
+  .users-page .table td:nth-child(2) {
+    min-width: 130px;
+  }
+
+  .users-page .table td:nth-child(3) {
+    min-width: 145px;
+    overflow-wrap: anywhere;
+  }
+
+  .users-page .table .user-profile-avatar,
+  .community-role-list .table .rounded-circle {
+    width: 1.875rem !important;
+    height: 1.875rem !important;
+    flex-basis: 1.875rem !important;
+  }
+
+  .users-page main .user-action-button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  .users-page .user-action-button .bi {
+    font-size: 0.8125rem !important;
+  }
+
+  .community-role-list main .community-action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+
+  .users-page .modal-dialog {
+    margin: 0.5rem;
+    max-height: calc(100dvh - 1rem) !important;
+  }
+
+  .users-page .modal-content {
+    font-size: 0.8125rem;
+  }
+
+  .users-page .modal-header,
+  .users-page .modal-body,
+  .users-page .modal-footer {
+    padding: 0.75rem;
+  }
+
+  .users-page .modal-title,
+  .users-page .modal-body h3 {
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  .users-page .modal-body dd {
+    overflow-wrap: anywhere;
+  }
+
+  .users-page .modal-body .user-profile-avatar {
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    flex: 0 0 3.5rem !important;
+  }
+
+  .users-page .modal-body .input-group {
+    flex-wrap: nowrap;
+  }
+
+  .users-page .modal-body .input-group-text {
+    width: 76px !important;
+    font-size: 0.75rem;
+    padding-inline: 0.375rem;
+  }
+
+  .users-page .modal-body .form-check-label,
+  .users-page .modal-body legend {
+    font-size: 0.8125rem !important;
+  }
+
+  .users-page .modal-body fieldset,
+  .users-page .modal-body fieldset section {
+    padding: 0.625rem !important;
+  }
+
+  .users-page .modal-body .form-text {
+    font-size: 0.7rem;
+  }
+}
+.profile-photo-action {
+  display: inline-grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+}
+
+.profile-photo-dialog {
+  width: min(22rem, calc(100% - 2rem));
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+}
+
+.profile-photo-dialog::backdrop {
+  background-color: rgb(0 0 0 / 45%);
+}
+
+.profile-photo-dialog-close {
+  color: #8b949e;
+  line-height: 1;
+}
+
+.profile-photo-dialog-close:hover {
+  color: var(--bs-secondary-color);
+}
+

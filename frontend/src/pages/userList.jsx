@@ -4,6 +4,8 @@ import { AuthContext } from '../context/AuthContext';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { processProfilePicture } from '../utils/processProfilePicture';
+import ProfilePhotoQr from '../components/ProfilePhotoQr';
+import './userList.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 const PROFILE_IMAGE_BASE_URL = (
@@ -49,17 +51,17 @@ function ProfileAvatar({ user, size = '2.75rem' }) {
 
   if (!imageUrl || imageFailed) {
     return (
-      <span className="rounded-circle border bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center" role="img" aria-label={`${fullName(user)} profile picture unavailable`} style={style}>
+      <span className="user-profile-avatar rounded-circle border bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center" role="img" aria-label={`${fullName(user)} profile picture unavailable`} style={style}>
         <i className={`bi bi-person-fill ${dimension === '5rem' ? 'fs-3' : ''}`} aria-hidden="true" />
       </span>
     );
   }
 
-  return <img src={imageUrl} alt={`${fullName(user)} profile`} className="rounded-circle border" style={style} onError={() => setImageFailed(true)} />;
+  return <img src={imageUrl} alt={`${fullName(user)} profile`} className="user-profile-avatar rounded-circle border" style={style} onError={() => setImageFailed(true)} />;
 }
 
 function displayLabel(value = '') {
-  return value.replaceAll('_', ' ');
+  return typeof value === 'string' && value ? value.replaceAll('_', ' ') : 'Not assigned';
 }
 
 function UserList() {
@@ -75,6 +77,8 @@ function UserList() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [reloadKey, setReloadKey] = useState(0);
+  const [pendingSignupCount, setPendingSignupCount] = useState(null);
+  const [signupCountError, setSignupCountError] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalMode, setModalMode] = useState('');
   const [editForm, setEditForm] = useState(null);
@@ -88,8 +92,43 @@ function UserList() {
   const editProfilePictureInput = useRef(null);
   const canAddUsers = Boolean(user?.canAddUsers);
   const canEditUsers = Boolean(user?.canEditUsers);
+  const canManagePermissions = canEditUsers && selectedUser?.user_id !== user?.userId;
   const canDeleteUsers = Boolean(user?.canDeleteUsers);
-  const canLoadUserOptions = canAddUsers || canEditUsers;
+
+  useEffect(() => {
+    if (!canAddUsers) return undefined;
+    const controller = new AbortController();
+    let fetching = false;
+    const refreshCount = async () => {
+      if (fetching || document.visibilityState === 'hidden') return;
+      fetching = true;
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/users/signup-requests/count`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('ld_cert_token') || ''}` },
+          signal: controller.signal,
+          cache: 'no-store',
+        });
+        const result = await response.json();
+        if (!response.ok || !result.success || !Number.isSafeInteger(result.pending_count) || result.pending_count < 0) throw new Error('Count unavailable');
+        if (!controller.signal.aborted) {
+          setPendingSignupCount(result.pending_count);
+          setSignupCountError(false);
+        }
+      } catch {
+        if (!controller.signal.aborted) setSignupCountError(true);
+      } finally { fetching = false; }
+    };
+    refreshCount();
+    const interval = window.setInterval(refreshCount, 30000);
+    window.addEventListener('focus', refreshCount);
+    document.addEventListener('visibilitychange', refreshCount);
+    return () => {
+      controller.abort();
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refreshCount);
+      document.removeEventListener('visibilitychange', refreshCount);
+    };
+  }, [canAddUsers, reloadKey]);
 
   useEffect(() => {
     if (!editProfilePicture) {
@@ -123,15 +162,13 @@ function UserList() {
         }
         setUsers(usersResult.data || []);
 
-        if (canLoadUserOptions) {
-          const optionsResponse = await fetch(`${API_BASE_URL}/api/users/options`, { headers, signal: controller.signal });
-          const optionsResult = await optionsResponse.json().catch(() => ({}));
-          if (!optionsResponse.ok || !optionsResult.success) {
-            throw new Error(optionsResult.message || 'Could not load institution options.');
-          }
-          setUnits(optionsResult.data.units || []);
-          setPermissionOptions(optionsResult.data.permissions || []);
+        const optionsResponse = await fetch(`${API_BASE_URL}/api/users/options`, { headers, signal: controller.signal });
+        const optionsResult = await optionsResponse.json().catch(() => ({}));
+        if (!optionsResponse.ok || !optionsResult.success) {
+          throw new Error(optionsResult.message || 'Could not load institution options.');
         }
+        setUnits(optionsResult.data.units || []);
+        setPermissionOptions(optionsResult.data.permissions || []);
       } catch (loadError) {
         if (loadError.name !== 'AbortError') {
           setError(loadError.message || 'Could not load the user list.');
@@ -143,7 +180,7 @@ function UserList() {
 
     loadData();
     return () => controller.abort();
-  }, [user, canLoadUserOptions, reloadKey]);
+  }, [user, reloadKey]);
 
   const filteredUsers = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -194,6 +231,7 @@ function UserList() {
     setError('');
     setSuccess('');
     setEditPermissions([]);
+    if (!canEditUsers || item.user_id === user?.userId) return;
     setPermissionsLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/users/${item.user_id}/permissions`, {
@@ -237,6 +275,11 @@ function UserList() {
     setEditForm((current) => ({ ...current, [name]: value }));
   };
 
+  const receivePhonePhoto = React.useCallback((photo) => {
+    setEditProfilePicture(photo);
+    setEditProfilePictureError('');
+  }, []);
+
   const saveEdit = async (event) => {
     event.preventDefault();
     if (!selectedUser || !editForm || editProfilePictureError || permissionsLoading) return;
@@ -269,14 +312,16 @@ function UserList() {
         throw new Error(result.message || 'Could not update this user.');
       }
 
-      const permissionsResponse = await fetch(`${API_BASE_URL}/api/users/${selectedUser.user_id}/permissions`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('ld_cert_token') || ''}` },
-        body: JSON.stringify({ permissions: editPermissions }),
-      });
-      const permissionsResult = await permissionsResponse.json().catch(() => ({}));
-      if (!permissionsResponse.ok || !permissionsResult.success) {
-        throw new Error(permissionsResult.message || 'User details saved, but access permissions could not be updated.');
+      if (canManagePermissions) {
+        const permissionsResponse = await fetch(`${API_BASE_URL}/api/users/${selectedUser.user_id}/permissions`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('ld_cert_token') || ''}` },
+          body: JSON.stringify({ permissions: editPermissions }),
+        });
+        const permissionsResult = await permissionsResponse.json().catch(() => ({}));
+        if (!permissionsResponse.ok || !permissionsResult.success) {
+          throw new Error(permissionsResult.message || 'User details saved, but access permissions could not be updated.');
+        }
       }
 
       setUsers((current) => current.map((item) => (
@@ -366,7 +411,11 @@ function UserList() {
       setError('You cannot reset your own password from this page.');
       return;
     }
-    if (!window.confirm(`Generate a new temporary password for ${fullName(item)}? They must change it at their next sign-in.`)) {
+    if (!item.email) {
+      setError('Add an email address to this user before resetting their password.');
+      return;
+    }
+    if (!window.confirm(`Email a new temporary password to ${item.email} for ${fullName(item)}? They must change it at their next sign-in.`)) {
       return;
     }
 
@@ -383,7 +432,7 @@ function UserList() {
         throw new Error(result.message || 'Could not reset this user password.');
       }
 
-      setSuccess(`Temporary password for ${fullName(item)} saved in: ${result.credential_file}`);
+      setSuccess(`Temporary password for ${fullName(item)} emailed to ${result.credential_email}. Ask the user to check their inbox and spam folder.`);
     } catch (resetError) {
       setError(resetError.message || 'Could not reset this user password.');
     } finally {
@@ -393,7 +442,7 @@ function UserList() {
 
   if (!user) {
     return (
-      <div className="min-vh-100 bg-light d-flex flex-column">
+      <div className="users-page user-accounts-page min-vh-100 bg-light d-flex flex-column">
         <BrandHeader />
         <main className="container py-5 flex-grow-1">
           <div className="alert alert-warning" role="alert">Sign in to view user accounts.</div>
@@ -403,20 +452,16 @@ function UserList() {
   }
 
   return (
-    <div className="min-vh-100 bg-light d-flex flex-column">
+    <div className="users-page user-accounts-page min-vh-100 bg-light d-flex flex-column">
     <BrandHeader />
     <main className="container py-4 flex-grow-1">
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
-          <p className="text-success text-uppercase fw-bold small mb-1">User Management</p>
-          <h1 className="h2 mb-0" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>User List</h1>
+          <p className="users-eyebrow text-success text-uppercase fw-bold small mb-1">User Management</p>
+          <h1 className="users-title h2 mb-0" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>User List</h1>
         </div>
         <div className="d-flex gap-2">
-          {canAddUsers && (
-            <Link className="btn btn-success" to="/users/new">
-              <i className="bi bi-person-plus me-1" aria-hidden="true" /> Add New User
-            </Link>
-          )}
+          {canAddUsers && <Link className="btn btn-primary" to="/users/signup-requests"><i className="bi bi-person-plus me-1" aria-hidden="true" /> Signup Request {!signupCountError && pendingSignupCount > 0 && <span className="badge rounded-pill text-bg-danger ms-1" aria-label={`${pendingSignupCount} pending or reviewed signup requests`} title="Pending and reviewed signup requests">{pendingSignupCount}</span>}</Link>}
         </div>
       </div>
 
@@ -436,7 +481,7 @@ function UserList() {
                 placeholder="Search by name, email, phone, or institution"
               />
             </div>
-            <div className="col-md-4">
+            <div className="users-status-filter col-md-4">
               <label htmlFor="user-status-filter" className="visually-hidden">Account status</label>
               <select id="user-status-filter" className="form-select" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
                 <option value="all">All accounts</option>
@@ -462,7 +507,7 @@ function UserList() {
                     <th scope="col">Contact</th>
                     <th scope="col">Institution</th>
                     <th scope="col">Status</th>
-                    <th scope="col" className="text-center">Actions</th>
+                    <th scope="col" className="text-center"><span className="d-md-none">View</span><span className="d-none d-md-inline">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -487,7 +532,7 @@ function UserList() {
                         </span>
                       </td>
                       <td className="text-center text-nowrap">
-                        <button className="btn btn-sm user-action-button me-1" type="button" onClick={() => showView(item)} aria-label={`View ${fullName(item)}`} title={`View ${fullName(item)}`}>
+                        <button className="users-view-button btn btn-sm user-action-button me-1" type="button" onClick={() => showView(item)} aria-label={`View ${fullName(item)}`} title={`View ${fullName(item)}`}>
                           <i className="bi bi-card-text fs-6" aria-hidden="true" />
                         </button>
                         {canEditUsers && (
@@ -561,7 +606,7 @@ function UserList() {
                       {success && <div className="alert alert-success" role="status">{success}</div>}
                       <div className="d-flex align-items-center gap-3 mb-3">
                         {editProfilePicturePreview ? (
-                          <img src={editProfilePicturePreview} alt="New profile picture preview" className="rounded-circle border" style={{ width: '5rem', height: '5rem', objectFit: 'cover' }} />
+                          <img src={editProfilePicturePreview} alt="New profile picture preview" className="user-profile-avatar rounded-circle border" style={{ width: '5rem', height: '5rem', objectFit: 'cover' }} />
                         ) : (
                           <ProfileAvatar user={selectedUser} size="5rem" />
                         )}
@@ -576,11 +621,13 @@ function UserList() {
                             tabIndex={-1}
                             disabled={isSaving}
                           />
-                          <button className="btn btn-outline-secondary btn-sm" type="button" onClick={() => editProfilePictureInput.current?.click()} disabled={isSaving}>
-                            <i className="bi bi-camera me-1" aria-hidden="true" />
-                            {editProfilePicture ? 'Choose another picture' : 'Change profile picture'}
-                          </button>
-                          <div className="form-text">JPEG, PNG, GIF, or WebP, up to 5 MB.</div>
+                          <div className="d-flex flex-wrap align-items-start gap-2">
+                            <button className="btn btn-outline-secondary rounded-circle profile-photo-action" type="button" title="Get from file" aria-label="Get from file" onClick={() => editProfilePictureInput.current?.click()} disabled={isSaving}>
+                              <i className="bi bi-camera" aria-hidden="true" />
+                            </button>
+                            {!isSaving && <ProfilePhotoQr key={selectedUser.user_id} apiBaseUrl={API_BASE_URL} userId={selectedUser.user_id} onPhoto={receivePhonePhoto} />}
+                          </div>
+                          <div className="form-text fst-italic" style={{ fontSize: '0.75rem' }}>JPEG, PNG, GIF, or WebP, up to 5 MB.</div>
                           {editProfilePictureError && <div className="text-danger small mt-1" role="alert">{editProfilePictureError}</div>}
                         </div>
                       </div>
@@ -630,7 +677,7 @@ function UserList() {
                             </select>
                           </div>
                         </div>
-                        <div className="col-12">
+                        {canManagePermissions && <div className="col-12">
                           <fieldset className="border rounded p-3">
                             <legend className="float-none w-auto px-2 fs-6 fw-semibold">Access permissions</legend>
                             <p className="small text-muted">Choose the actions this account can perform. Permissions are grouped by the records they apply to.</p>
@@ -649,7 +696,7 @@ function UserList() {
                                               className="form-check-input"
                                               type="checkbox"
                                               checked={editPermissions.includes(permission.key)}
-                                              disabled={isSaving || permissionsLoading || selectedUser.user_id === user?.userId}
+                                              disabled={isSaving || permissionsLoading}
                                               onChange={(event) => setEditPermissions((current) => event.target.checked
                                                 ? [...current, permission.key]
                                                 : current.filter((key) => key !== permission.key))}
@@ -664,9 +711,8 @@ function UserList() {
                               })}
                             </div>
                             {permissionsLoading && <div className="small text-muted">Loading permissions…</div>}
-                            {selectedUser.user_id === user?.userId && <div className="form-text">You cannot change your own permissions.</div>}
                           </fieldset>
-                        </div>
+                        </div>}
                       </div>
                     </div>
                     <div className="modal-footer">
@@ -681,7 +727,7 @@ function UserList() {
                 {modalMode === 'view' && (
                   <div className="modal-footer">
                     <button className="btn btn-outline-secondary" type="button" onClick={closeModal}>Close</button>
-                    {canEditUsers && <button className="btn btn-success" type="button" onClick={() => showEdit(selectedUser)}>Edit user</button>}
+                    {(canEditUsers || selectedUser.user_id === user?.userId) && <button className="btn btn-success" type="button" onClick={() => showEdit(selectedUser)}>Edit user</button>}
                   </div>
                 )}
               </div>

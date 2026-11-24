@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import CommunityProfileAvatar from '../components/CommunityProfileAvatar';
+import './userList.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 
@@ -102,12 +103,12 @@ function CommunityRoleList({ role }) {
   const canDelete = Boolean(user?.canDeleteUsers);
 
   return (
-    <div className="min-vh-100 bg-light d-flex flex-column">
+    <div className={`users-page community-role-list ${role === 'mentor' ? 'mentor-list-page' : 'certifier-list-page'} min-vh-100 bg-light d-flex flex-column`}>
       <BrandHeader />
       <main className="container py-4 flex-grow-1">
         <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-          <div><p className="text-success text-uppercase fw-bold small mb-1">Community</p><h1 className="h2 mb-1" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>{label} Accounts</h1><p className="text-secondary mb-0">Manage {label.toLowerCase()} directory entries from existing user accounts.</p></div>
-          {canAdd && <button className="btn btn-success" type="button" onClick={openAdd}><i className="bi bi-person-plus me-2" aria-hidden="true" />Add {label}</button>}
+          <div><p className="users-eyebrow text-success text-uppercase fw-bold small mb-1">Community</p><h1 className="users-title h2 mb-1" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>{label} Accounts</h1><p className="text-secondary mb-0">Manage {label.toLowerCase()} directory entries from existing user accounts.</p></div>
+          {canAdd && <button className="users-add-button btn btn-success" type="button" onClick={openAdd}><i className="bi bi-person-plus me-2" aria-hidden="true" />Add {label}</button>}
         </div>
         {error && !editing && <div className="alert alert-danger" role="alert">{error}</div>}
         {notice && <div className="alert alert-success" role="status">{notice}</div>}
@@ -115,7 +116,7 @@ function CommunityRoleList({ role }) {
           <div className="mb-3"><label htmlFor={`${role}-search`} className="visually-hidden">Search {label.toLowerCase()} accounts</label><input id={`${role}-search`} className="form-control" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by name, email, or affiliation" /></div>
           {loading ? <div className="text-center text-secondary py-5" role="status"><span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />Loading {label.toLowerCase()} accounts...</div>
             : visiblePeople.length === 0 ? <div className="text-center text-secondary py-5">{people.length ? 'No accounts match your search.' : `No ${label.toLowerCase()} accounts have been added.`}</div>
-              : <div className="table-responsive"><table className="table table-hover align-middle mb-0"><caption className="visually-hidden">{label} accounts</caption><thead className="table-light"><tr><th scope="col" className="text-nowrap text-center">ID No</th><th>Name</th><th>Email</th><th>Affiliation</th><th>Status</th><th className="text-center">Actions</th></tr></thead><tbody>
+              : <div className="table-responsive"><table className="table table-hover align-middle mb-0"><caption className="visually-hidden">{label} accounts</caption><thead className="table-light"><tr><th scope="col" className="text-nowrap text-center">ID No</th><th>Name</th><th>Email</th><th>Affiliation</th><th>Status</th><th className="text-center"><span className="d-md-none">View</span><span className="d-none d-md-inline">Actions</span></th></tr></thead><tbody>
                 {[...visiblePeople].sort((a, b) => Number(b.user_id) - Number(a.user_id)).map((person) => <tr key={person.user_id}><td className="text-nowrap text-center">{person.user_id}</td><td><div className="d-flex align-items-center gap-2"><CommunityProfileAvatar key={`${person.user_id}-${person.profilepict || ''}`} person={person} /><span className="fw-semibold">{fullName(person)}</span></div></td><td>{person.email || '—'}</td><td>{person.unit_name || '—'}</td><td><span className={`badge ${person.is_active ? 'text-bg-success' : 'text-bg-secondary'}`}>{person.is_active ? 'Active' : 'Inactive'}</span></td><td className="text-center"><div className="d-inline-flex gap-2"><Link className="btn btn-sm btn-outline-secondary community-action-button" to={`/community/${role === 'mentor' ? 'mentors' : 'certifiers'}/${person.user_id}`} aria-label={`View ${fullName(person)}`} title={`View ${label.toLowerCase()} details`}><i className="bi bi-card-text text-secondary" aria-hidden="true" /></Link>{canDelete && <button className="btn btn-sm btn-outline-secondary community-action-button" type="button" onClick={() => removeAssignment(person)} aria-label={`Remove ${fullName(person)}`}><i className="bi bi-trash text-secondary" aria-hidden="true" /></button>}</div></td></tr>)}
               </tbody></table></div>}
         </div></section>

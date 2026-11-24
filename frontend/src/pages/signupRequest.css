@@ -1,0 +1,46 @@
+.signup-request-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+}
+
+.signup-request-card {
+  width: 100%;
+  max-width: 480px;
+}
+
+.signup-request-card .card-body {
+  padding: 1.5rem;
+}
+
+.signup-request-card h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.5rem;
+}
+
+.signup-request-card .form-control {
+  font-size: 1rem;
+}
+
+@media (max-width: 767.98px) {
+  .signup-request-page {
+    padding: 0.75rem 0.75rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .signup-request-card .card-body {
+    padding: 1rem;
+    font-size: 0.8125rem;
+  }
+
+  .signup-request-card h1 {
+    font-size: 1.2rem;
+  }
+
+  .signup-request-card .form-label,
+  .signup-request-card .btn {
+    font-size: 0.8125rem;
+  }
+}

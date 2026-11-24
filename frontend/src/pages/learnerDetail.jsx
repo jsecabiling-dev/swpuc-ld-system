@@ -5,6 +5,7 @@ import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { formatShortDate } from '../utils/dateFormat';
 import { printCertificate as printCertificateDocument } from '../utils/printCertificate';
+import './learnerDetail.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 const PROFILE_IMAGE_BASE_URL = (
@@ -33,13 +34,13 @@ function LearnerProfilePicture({ learner }) {
 
   if (!imageUrl || imageFailed) {
     return (
-      <span className="rounded-circle border bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center" role="img" aria-label={`${fullName(learner)} profile picture unavailable`} style={style}>
+      <span className="learner-detail-avatar rounded-circle border bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center" role="img" aria-label={`${fullName(learner)} profile picture unavailable`} style={style}>
         <i className="bi bi-person-fill fs-3" aria-hidden="true" />
       </span>
     );
   }
 
-  return <img src={imageUrl} alt={`${fullName(learner)} profile`} className="rounded-circle border" style={style} onError={() => setImageFailed(true)} />;
+  return <img src={imageUrl} alt={`${fullName(learner)} profile`} className="learner-detail-avatar rounded-circle border" style={style} onError={() => setImageFailed(true)} />;
 }
 
 function renderStatusMark(participant, field, label) {
@@ -202,7 +203,7 @@ function LearnerDetail() {
   }, [user, userId]);
 
   return (
-    <div className="min-vh-100 bg-light d-flex flex-column">
+    <div className="learner-detail-page min-vh-100 bg-light d-flex flex-column">
       <BrandHeader />
       <main className="container py-4 flex-grow-1">
         <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">

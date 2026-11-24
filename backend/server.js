@@ -14,6 +14,7 @@ const app = express();
 
 // 1. Core Global Middleware Setup
 app.use(cors());
+app.use('/api/signup-requests', require('./routes/signupRequests').createSignupRouter());
 app.use(express.json({ limit: '7mb' }));
 
 // 2. Mount Authentication Router (Placed exactly here)
@@ -21,6 +22,7 @@ const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 const userRoutes = require('./routes/users');
 app.use('/api/users', userRoutes);
+app.use('/api/certificates', require('./routes/certificates'));
 const communityRoleRoutes = require('./routes/communityRoles');
 app.use('/api/community-roles', communityRoleRoutes);
 const institutionRoutes = require('./routes/institutions');

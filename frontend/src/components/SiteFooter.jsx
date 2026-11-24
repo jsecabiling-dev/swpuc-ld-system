@@ -6,7 +6,7 @@ const technologies = [
   { name: 'MySQL', logo: 'https://cdn.simpleicons.org/mysql/4B5563', size: 34 },
   { name: 'Bootstrap', logo: 'https://cdn.simpleicons.org/bootstrap/4B5563' },
   { name: 'Google Fonts', logo: 'https://cdn.simpleicons.org/googlefonts/4B5563', size: 30},
- // { name: 'GitHub', logo: 'https://cdn.simpleicons.org/github/4B5563' },
+  { name: 'GitHub', logo: 'https://cdn.simpleicons.org/github/4B5563' },
   
   //{ name: 'React Router', logo: 'https://cdn.simpleicons.org/reactrouter/4B5563' },
   //{ name: 'Express', logo: 'https://cdn.simpleicons.org/express/4B5563' },
@@ -18,7 +18,7 @@ const technologies = [
 function SiteFooter() {
   return (
     <footer className="site-footer text-center px-3 pb-3 pt-3 mt-auto">
-      <small className="text-muted d-block" style={{ fontSize: '0.9rem', fontWeight: 'normal', fontStyle: 'italic' }}>
+      <small className="text-muted d-block" style={{ fontWeight: 'normal', fontStyle: 'italic' }}>
         (c)2026 Bebot Cabiling Computing &bull; Northeastern Mindanao Mission &bull; Butuan City
       </small>
       <div className="d-flex flex-wrap justify-content-center align-items-center gap-4 mt-2" aria-label="Technologies used">

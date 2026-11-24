@@ -1,0 +1,167 @@
+.certifier-detail-page .table tr > :nth-child(3),
+.mentor-detail-page .table tr > :nth-child(3) {
+  text-align: center;
+}
+
+@media (max-width: 767.98px) {
+  .mentor-detail-page .table tr > :nth-child(1),
+  .mentor-detail-page .table tr > :nth-child(4) {
+    display: none;
+  }
+
+  .certifier-detail-page .table tr > :nth-child(1),
+  .certifier-detail-page .table tr > :nth-child(4),
+  .certifier-detail-page .table tr > :nth-child(5),
+  .certifier-detail-page .certifier-add-courses {
+    display: none;
+  }
+
+  .community-detail-page.min-vh-100 > main.container {
+    padding: 0.75rem 0.75rem 5rem !important;
+    min-width: 0;
+    font-size: 0.8125rem;
+  }
+
+  .community-detail-page main > .d-flex {
+    gap: 0.5rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .community-detail-page main h1 {
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+  }
+
+  .community-detail-page main .text-uppercase {
+    font-size: 0.625rem;
+  }
+
+  .community-detail-page main h2 {
+    font-size: 0.9rem;
+  }
+
+  .community-detail-page .card-body.p-4 {
+    padding: 0.75rem !important;
+  }
+
+  .community-detail-page main section.mb-4 {
+    margin-bottom: 0.75rem !important;
+  }
+
+  .community-detail-page .mentor-profile-layout {
+    flex-direction: row !important;
+    align-items: flex-start;
+    gap: 0.625rem !important;
+  }
+
+  .community-detail-page .mentor-profile-layout > .rounded-circle {
+    width: 3rem !important;
+    height: 3rem !important;
+    flex-basis: 3rem !important;
+  }
+
+  .community-detail-page .mentor-profile-layout > .flex-grow-1 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .community-detail-page .mentor-profile-layout h2 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .community-detail-page dl {
+    --bs-gutter-x: 0.75rem;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 0.625rem;
+    row-gap: 0.25rem;
+    margin-inline: 0;
+  }
+
+  .community-detail-page dt,
+  .community-detail-page dd {
+    width: auto;
+    max-width: none;
+    padding: 0;
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .community-detail-page .mentor-course-actions {
+    display: none;
+  }
+
+  .community-detail-page .badge {
+    font-size: 0.625rem;
+  }
+
+  .community-detail-page main .btn,
+  .community-detail-page .modal .btn {
+    min-height: 32px;
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .community-detail-page .card-body > .d-flex {
+    gap: 0.625rem !important;
+  }
+
+  .community-detail-page .table {
+    font-size: 0.75rem;
+    --bs-table-border-color: #e9ecef;
+  }
+
+  .community-detail-page .table > :not(caption) > * > * {
+    padding: 0.35rem;
+    border-bottom-width: 0.5px;
+  }
+
+  .community-detail-page .table td:nth-child(2) {
+    min-width: 135px;
+  }
+
+  .community-detail-page .alert {
+    font-size: 0.8125rem;
+    padding: 0.625rem;
+    overflow-wrap: anywhere;
+  }
+
+  .community-detail-page .modal-dialog {
+    margin: 0.5rem;
+    height: calc(100% - 1rem);
+  }
+
+  .community-detail-page .modal-content {
+    max-height: calc(100dvh - 1rem);
+    font-size: 0.8125rem;
+  }
+
+  .community-detail-page .modal-title {
+    font-size: 0.95rem;
+  }
+
+  .community-detail-page .modal-header,
+  .community-detail-page .modal-body,
+  .community-detail-page .modal-footer {
+    padding: 0.75rem;
+  }
+
+  .community-detail-page .form-label,
+  .community-detail-page .list-group-item {
+    font-size: 0.8125rem;
+  }
+
+  .community-detail-page .list-group-item {
+    padding: 0.5rem;
+    overflow-wrap: anywhere;
+  }
+
+  .community-detail-page .form-control {
+    font-size: 1rem;
+    min-width: 0;
+  }
+
+  .community-detail-page .form-control::placeholder {
+    font-size: 0.75rem;
+  }
+}

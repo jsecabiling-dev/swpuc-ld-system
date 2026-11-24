@@ -1,8 +1,11 @@
 import React, { useContext } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Login from './pages/login'; 
+import SignupRequest from './pages/signupRequest';
+import SignupRequestList from './pages/signupRequestList';
+import ProfilePhotoUpload from './pages/profilePhotoUpload';
+import CertificateVerification from './pages/certificateVerification';
 import Home from './pages/home';
-import UserAdd from './pages/userAdd';
 import UserList from './pages/userList';
 import LearnerList from './pages/learnerList';
 import LearnerDetail from './pages/learnerDetail';
@@ -42,6 +45,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup-request" element={<SignupRequest />} />
+        <Route path="/profile-photo-upload" element={<ProfilePhotoUpload />} />
+        <Route path="/verify-certificate/:code" element={<CertificateVerification />} />
+        <Route path="/users/signup-requests" element={<ProtectedRoute><SignupRequestList /></ProtectedRoute>} />
         <Route
           path="/help"
           element={
@@ -65,14 +72,6 @@ function App() {
               <Home />
             </ProtectedRoute>
           } 
-        />
-        <Route
-          path="/users/new"
-          element={
-            <ProtectedRoute>
-              <UserAdd />
-            </ProtectedRoute>
-          }
         />
         <Route
           path="/users"

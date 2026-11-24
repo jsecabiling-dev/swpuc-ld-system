@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Collapse, Dropdown } from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import sdaLogoGreen from '../pages/thumbnails/sda_logo_green.png';
 import { AuthContext } from '../context/AuthContext';
+import './BrandHeader.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 const PROFILE_IMAGE_BASE_URL = (
@@ -31,9 +33,21 @@ function BrandHeader({ showMenu = true }) {
     logout();
   };
 
+  const handleMenuSelection = (event) => {
+    if (!event.target.closest('a[href]') || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+
+    const menu = event.currentTarget;
+    menu.querySelectorAll('[data-bs-toggle="dropdown"]').forEach((toggle) => {
+      Dropdown.getInstance(toggle)?.hide();
+    });
+    if (menu.classList.contains('show')) {
+      Collapse.getOrCreateInstance(menu, { toggle: false }).hide();
+    }
+  };
+
   return (
     <>
-      <nav className="navbar navbar-dark bg-dark shadow-sm py-3">
+      <nav className="brand-header navbar navbar-dark bg-dark shadow-sm py-3">
         <div className="container">
           <NavLink className="navbar-brand d-flex align-items-center" to={user ? '/home' : '/'} aria-label="Home">
             <img src={sdaLogoGreen} alt="" className="img-fluid me-2" style={{ maxHeight: '60px' }} />
@@ -44,7 +58,7 @@ function BrandHeader({ showMenu = true }) {
             </div>
           </NavLink>
 
-          <div className="d-flex align-items-center gap-3 ms-auto">
+          <div className="brand-account d-flex align-items-center ms-auto">
             {user ? (
               <>
                 <div className="d-flex align-items-center">
@@ -52,29 +66,26 @@ function BrandHeader({ showMenu = true }) {
                     <img
                       src={getProfileImageUrl(profileImage)}
                       alt={`${currentUserName}'s profile`}
-                      className="rounded-circle border border-secondary img-fluid me-2"
-                      style={{ width: '2.7rem', height: '2.7rem', flex: '0 0 2.7rem', objectFit: 'cover' }}
+                      className="brand-avatar rounded-circle border border-secondary img-fluid"
                       onError={() => setProfileImageFailed(true)}
                     />
                   ) : (
                     <span
-                      className="rounded-circle border border-secondary bg-secondary-subtle text-secondary d-inline-flex align-items-center justify-content-center me-2"
+                      className="brand-avatar rounded-circle border border-secondary bg-secondary-subtle text-secondary d-inline-flex align-items-center justify-content-center"
                       role="img"
                       aria-label={`${currentUserName}'s profile picture is unavailable`}
-                      style={{ width: '2.7rem', height: '2.7rem', flex: '0 0 2.7rem' }}
                     >
                       <i className="bi bi-person-fill" aria-hidden="true" />
                     </span>
                   )}
-                  <span className="text-light text-capitalize" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
+                  <span className="d-none d-md-inline text-light text-capitalize ms-2" style={{ fontSize: '0.9rem', fontWeight: 'normal' }}>
                     {currentUserName}
                   </span>
                 </div>
                 <button
-                  className="btn btn-outline-light btn-sm d-inline-flex align-items-center"
+                  className="brand-signout btn btn-outline-light btn-sm d-inline-flex align-items-center"
                   type="button"
                   onClick={handleLogout}
-                  style={{ paddingLeft: '0.75rem', paddingRight: '0.75rem' }}
                 >
                   <i className="bi bi-box-arrow-right me-1" aria-hidden="true" /> Sign Out
                 </button>
@@ -103,7 +114,7 @@ function BrandHeader({ showMenu = true }) {
               <span className="navbar-toggler-icon" />
             </button>
 
-            <div className="collapse navbar-collapse" id="site-menu">
+            <div className="collapse navbar-collapse" id="site-menu" onClick={handleMenuSelection}>
               <ul className="navbar-nav gap-2 gap-lg-4">
                 <li className="nav-item">
                   <NavLink className="nav-link d-flex align-items-center" to={user ? '/home' : '/'} end><i className="bi bi-house-door me-2" aria-hidden="true" />Home</NavLink>

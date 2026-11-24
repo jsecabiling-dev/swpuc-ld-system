@@ -263,6 +263,10 @@ main:has(> .site-footer) {
     margin-top: 0.25rem !important;
 }
 
+.site-footer small {
+    font-size: 0.9rem;
+}
+
 .site-footer img {
     max-width: 20px;
     max-height: 20px;
@@ -271,6 +275,59 @@ main:has(> .site-footer) {
 .site-footer img[alt="MySQL logo"] {
     max-width: 40px;
     max-height: 40px;
+}
+
+@media (max-width: 767.98px) {
+    .table-responsive {
+        padding-bottom: 1rem;
+        scroll-padding-bottom: 1rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Keep the footer after table content rather than over its final rows. */
+    .min-vh-100:has(> main .table-responsive) > .site-footer {
+        position: relative;
+        inset: auto;
+        flex-shrink: 0;
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .min-vh-100:has(> main .table-responsive) > main.flex-grow-1 {
+        padding-bottom: 1rem !important;
+    }
+
+    .institution-list-scroll,
+    .learning-course-list-scroll,
+    .department-list-scroll {
+        max-height: 65dvh;
+    }
+
+    .event-participants-card {
+        height: auto;
+    }
+
+    .event-participants-scroll {
+        flex-basis: auto;
+        max-height: 65dvh;
+    }
+
+    .site-footer small {
+        font-size: 0.625rem;
+        line-height: 1.35;
+    }
+
+    .site-footer .d-flex[aria-label="Technologies used"] {
+        gap: 0.5rem !important;
+    }
+
+    .site-footer img,
+    .site-footer img[alt="MySQL logo"] {
+        width: auto;
+        height: 14px;
+        max-height: 14px;
+        max-width: 24px;
+        object-fit: contain;
+    }
 }
 
 @media (max-height: 800px) {

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
+import './userList.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 const PROFILE_IMAGE_BASE_URL = (
@@ -31,13 +32,13 @@ function LearnerAvatar({ learner }) {
 
   if (!imageUrl || imageFailed) {
     return (
-      <span className="rounded-circle border bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center" role="img" aria-label={`${fullName(learner)} profile picture unavailable`} style={style}>
+      <span className="user-profile-avatar rounded-circle border bg-secondary-subtle text-secondary d-inline-flex justify-content-center align-items-center" role="img" aria-label={`${fullName(learner)} profile picture unavailable`} style={style}>
         <i className="bi bi-card-list" aria-hidden="true" />
       </span>
     );
   }
 
-  return <img src={imageUrl} alt={`${fullName(learner)} profile`} className="rounded-circle border" style={style} onError={() => setImageFailed(true)} />;
+  return <img src={imageUrl} alt={`${fullName(learner)} profile`} className="user-profile-avatar rounded-circle border" style={style} onError={() => setImageFailed(true)} />;
 }
 
 function LearnerList() {
@@ -103,14 +104,14 @@ function LearnerList() {
   }, [learners, search]);
 
   return (
-    <div className="min-vh-100 bg-light d-flex flex-column">
+    <div className="users-page learner-list-page min-vh-100 bg-light d-flex flex-column">
       <BrandHeader />
       <main className="container py-4 flex-grow-1">
         <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
           <div>
-            <p className="text-success text-uppercase fw-bold small mb-1">Community</p>
-            <div className="d-flex flex-wrap align-items-baseline gap-4">
-              <h1 className="h2 mb-0" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>
+            <p className="users-eyebrow text-success text-uppercase fw-bold small mb-1">Community</p>
+            <div className="learner-list-heading d-flex flex-wrap align-items-baseline gap-4">
+              <h1 className="users-title h2 mb-0" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>
                 Learner List
               </h1>
               <p className="text-secondary mb-0">A person appears here when they are registered as a learner in at least one learning event.</p>
@@ -150,7 +151,7 @@ function LearnerList() {
                       <th scope="col">Name</th>
                       <th scope="col">Affiliation</th>
                       <th scope="col" className="text-center">Events Participated</th>
-                      <th scope="col" className="text-center">Actions</th>
+                      <th scope="col" className="text-center"><span className="d-md-none">View</span><span className="d-none d-md-inline">Actions</span></th>
                     </tr>
                   </thead>
                   <tbody>

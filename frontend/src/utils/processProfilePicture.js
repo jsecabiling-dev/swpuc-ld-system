@@ -26,9 +26,13 @@ function canvasToBlob(canvas, quality) {
   });
 }
 
-export async function processProfilePicture(file) {
+export async function processProfilePicture(file, {
+  maxBytes = MAX_OUTPUT_BYTES,
+  maxDimension = MAX_DIMENSION,
+  qualities = [0.82, 0.68, 0.54, 0.4],
+} = {}) {
   const image = await loadImage(file);
-  let scale = Math.min(1, MAX_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
+  let scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
 
   for (let dimensionAttempt = 0; dimensionAttempt < 5; dimensionAttempt += 1) {
     const canvas = document.createElement('canvas');
@@ -38,16 +42,17 @@ export async function processProfilePicture(file) {
     if (!context) throw new Error('Could not resize the selected profile picture.');
     context.fillStyle = '#fff';
     context.fillRect(0, 0, canvas.width, canvas.height);
+    context.imageSmoothingQuality = 'high';
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    for (const quality of [0.82, 0.68, 0.54, 0.4]) {
+    for (const quality of qualities) {
       const blob = await canvasToBlob(canvas, quality);
-      if (blob.size <= MAX_OUTPUT_BYTES) {
+      if (blob.size <= maxBytes) {
         return new File([blob], 'profile-picture.jpg', { type: 'image/jpeg', lastModified: Date.now() });
       }
     }
     scale *= 0.75;
   }
 
-  throw new Error('Could not reduce the profile picture below 50 KB. Choose a smaller image.');
+  throw new Error(`Could not reduce the profile picture below ${maxBytes / 1024} KB. Choose a smaller image.`);
 }

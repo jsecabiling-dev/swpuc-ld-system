@@ -73,10 +73,10 @@ function Help() {
                   </div>
                   <div className="modal-body">
                     {activeGuide === 'Users and permissions' ? <>
-                    <h3 className="h6 fw-bold">Add a user</h3>
+                    <h3 className="h6 fw-bold">Approve a signup request</h3>
                     <ol className="ps-3 text-secondary">
-                      <li className="mb-2">Open <strong>Community → User</strong>, then select <span className="btn btn-success btn-sm py-0 px-2 text-nowrap"><i className="bi bi-person-plus me-1" aria-hidden="true" />Add New User</span>.</li>
-                      <li>Complete the required fields, select the user’s institution, then save the new account.</li>
+                      <li className="mb-2">Open <strong>Community → User</strong>, then select <strong>Signup Request</strong>.</li>
+                      <li>Review the request and select <strong>Create user</strong> to approve it. The system emails temporary sign-in credentials to the applicant.</li>
                     </ol>
 
                     <h3 className="h6 fw-bold mt-4">Edit a user and permissions</h3>

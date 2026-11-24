@@ -1,0 +1,95 @@
+.brand-account {
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.brand-avatar {
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+  object-fit: cover;
+}
+
+.brand-header .brand-signout {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.5rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+  nav.navbar[aria-label="Main navigation"] {
+    padding-block: 0.125rem;
+    min-height: 40px;
+  }
+
+  nav.navbar[aria-label="Main navigation"] .navbar-toggler {
+    min-width: 44px;
+    min-height: 36px;
+    padding: 0.125rem 0.5rem;
+    font-size: 1rem;
+  }
+
+  nav.navbar[aria-label="Main navigation"] .navbar-toggler-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .brand-header.navbar > .container {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .brand-header .navbar-brand {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    white-space: normal;
+    margin-right: 0;
+  }
+
+  .brand-header .navbar-brand > div {
+    min-width: 0;
+  }
+
+  .brand-header .navbar-brand > div > small {
+    display: none;
+  }
+
+  .brand-header .navbar-brand > img {
+    max-height: 42px !important;
+    flex-shrink: 0;
+  }
+
+  .brand-header .navbar-brand span:first-child {
+    font-size: 0.72rem !important;
+  }
+
+  .brand-header .navbar-brand span:nth-child(2) {
+    font-size: 1rem !important;
+    overflow-wrap: anywhere;
+  }
+
+  .brand-header .brand-account {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .brand-avatar {
+    width: 1.75rem;
+    height: 1.75rem;
+    flex-basis: 1.75rem;
+  }
+
+  .brand-header .brand-account .brand-signout {
+    font-size: 0.6rem !important;
+    line-height: 1.2;
+    min-height: 28px;
+    padding: 0.2rem 0.3rem;
+  }
+}
