@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ProfilePhotoCrop from '../components/ProfilePhotoCrop';
 import { processProfilePicture } from '../utils/processProfilePicture';
 import './profilePhotoUpload.css';
@@ -22,6 +22,7 @@ export default function ProfilePhotoUpload() {
 }
 
 function PhotoUploadForm({ token }) {
+  const navigate = useNavigate();
   const draftKey = `profile-photo-draft:${token.split('.')[0]}`;
   const [photo, setPhoto] = useState(() => {
     try {
@@ -35,6 +36,12 @@ function PhotoUploadForm({ token }) {
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(() => !token && window.history.state?.profilePhotoSent === true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!sent) return;
+    const redirectTimer = window.setTimeout(() => navigate('/login', { replace: true }), 10_000);
+    return () => window.clearTimeout(redirectTimer);
+  }, [sent, navigate]);
 
   const choosePhoto = async (event) => {
     const input = event.currentTarget;
@@ -108,8 +115,9 @@ function PhotoUploadForm({ token }) {
         <div role="status">
           <i className="bi bi-check-circle-fill text-success fs-1" aria-hidden="true" />
           <h1 className="h3 mt-3">Thank you!</h1>
-          <p className="mb-0">Your photo was sent successfully. You can now close this page.</p>
+          <p className="mb-0">Your photo was sent successfully.</p>
         </div>
+        <Link className="btn btn-success mt-3" to="/login" replace>Close</Link>
       </main>
     );
   }

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { formatShortDate } from '../utils/dateFormat';
@@ -8,6 +9,7 @@ import { printCertificate as printCertificateDocument } from '../utils/printCert
 import './learnerDetail.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
+const eventName = (record) => record.event_name || record.course_title || 'Learning event';
 const PROFILE_IMAGE_BASE_URL = (
   import.meta.env.VITE_PROFILE_IMAGE_BASE_URL || `${API_BASE_URL}/api/profile-pictures`
 ).replace(/\/+$/, '');
@@ -73,6 +75,7 @@ function LearnerDetail() {
   const canEditProgress = Boolean(user?.canEditProgress);
   const [learner, setLearner] = useState(null);
   const [journey, setJourney] = useState([]);
+  const sort = useTableSort();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [certificateRecord, setCertificateRecord] = useState(null);
@@ -248,8 +251,8 @@ function LearnerDetail() {
                     <thead className="table-light">
                       <tr>
                         <th scope="col" className="text-center">ID No</th>
-                        <th scope="col">Event</th>
-                        <th scope="col">Offering Institution</th>
+                        <SortableTableHeader sort={sort} column="event">Event</SortableTableHeader>
+                        <SortableTableHeader sort={sort} column="institution">Offering Institution</SortableTableHeader>
                         <th scope="col">Schedule</th>
                         <th scope="col">Delivery Mode</th>
                         <th scope="col" className="text-center">Attended</th>
@@ -259,11 +262,11 @@ function LearnerDetail() {
                       </tr>
                     </thead>
                     <tbody>
-                      {[...journey].sort((a, b) => Number(b.participation_id) - Number(a.participation_id)).map((record) => (
+                      {sort.order(journey, { event: eventName, institution: (row) => row.offering_institution }, (a, b) => Number(b.participation_id) - Number(a.participation_id)).map((record) => (
                         <tr key={record.participation_id}>
                           <td>{record.event_id || '—'}</td>
                           <td>
-                            <div className="fw-semibold">{record.event_name || record.course_title || 'Learning event'}</div>
+                            <div className="fw-semibold">{eventName(record)}</div>
                             {formatCertificateLevel(record.learning_level) && <small className="text-muted d-block">{formatCertificateLevel(record.learning_level)}</small>}
                           </td>
                           <td>{record.offering_institution || '—'}</td>
@@ -276,8 +279,8 @@ function LearnerDetail() {
                           <td className="text-center">{renderStatusMark(record, 'completed', 'Completed')}</td>
                           <td className="text-center text-nowrap">
                             {record.certified ? (
-                              <button className="btn btn-sm btn-outline-success" type="button" onClick={() => printCertificate(record)}>
-                                <i className="bi bi-printer me-1" aria-hidden="true" />Print
+                              <button className="btn btn-sm btn-outline-success table-action-button" type="button" onClick={() => printCertificate(record)} aria-label={`Print certificate for ${eventName(record)}`} title="Print certificate">
+                                <i className="bi bi-printer" aria-hidden="true" />
                               </button>
                             ) : (
                               <span role="img" aria-label="Certificate not issued">

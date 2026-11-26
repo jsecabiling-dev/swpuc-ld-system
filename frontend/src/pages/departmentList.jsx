@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { formatShortDate } from '../utils/dateFormat';
@@ -8,6 +9,7 @@ import { formatShortDate } from '../utils/dateFormat';
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 
 function DepartmentList() {
+  const sort = useTableSort();
   const { user } = useContext(AuthContext);
   const canAdd = Boolean(user?.canAddCourses);
   const canEdit = Boolean(user?.canEditCourses);
@@ -178,13 +180,13 @@ function DepartmentList() {
                   <caption className="visually-hidden">Departments and available actions</caption>
                   <thead className="table-light">
                     <tr><th scope="col" className="text-nowrap text-center">ID No</th>
-                      <th scope="col">Department</th>
+                      <SortableTableHeader sort={sort} column="name">Department</SortableTableHeader>
                       <th scope="col">Created</th>
                       <th scope="col" className="text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...filteredDepartments].sort((a, b) => Number(b.department_id) - Number(a.department_id)).map((department) => (
+                    {sort.order(filteredDepartments, { name: (row) => row.name }, (a, b) => Number(b.department_id) - Number(a.department_id)).map((department) => (
                       <tr key={department.department_id}><td className="text-nowrap text-center">{department.department_id}</td>
                         <td>
                           <div className="fw-semibold">{department.name}</div>

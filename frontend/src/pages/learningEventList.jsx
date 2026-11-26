@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { formatShortDate } from '../utils/dateFormat';
@@ -142,6 +143,7 @@ function dateApiValue(value) {
 }
 
 function LearningEventList() {
+  const sort = useTableSort();
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
@@ -434,15 +436,18 @@ function LearningEventList() {
   return (
     <div className="min-vh-100 bg-light d-flex flex-column">
       <BrandHeader />
-      <main className="container py-4 flex-grow-1">
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+      <main className="container py-4 flex-grow-1 learning-list">
+        <div className="d-flex flex-md-wrap align-items-end align-items-md-center justify-content-between gap-2 gap-md-3 mb-4">
           <div>
             <p className="text-success text-uppercase fw-bold small mb-1">Learning Management</p>
             <h1 className="h2 mb-0" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>Learning Event List</h1>
           </div>
-          <div className="d-flex gap-2">
-            {canAddEvents && <button className="btn btn-success" type="button" onClick={openAdd}><i className="bi bi-plus-lg me-1" aria-hidden="true" /> Submit Learning Event Proposal</button>}
-          </div>
+          {canAddEvents && (
+            <button className="btn btn-success flex-shrink-0 learning-list-add" type="button" onClick={openAdd} aria-label="Submit Learning Event Proposal">
+              <i className="bi bi-plus-lg me-md-1" aria-hidden="true" />
+              <span className="d-none d-md-inline">Submit Learning Event Proposal</span>
+            </button>
+          )}
         </div>
 
         {error && !modalMode && <div className="alert alert-danger" role="alert">{error}</div>}
@@ -454,7 +459,7 @@ function LearningEventList() {
             if (!mouseEvent.target.closest('.event-search-dropdown')) setShowEventSuggestions(false);
           }}
         >
-          <div className="card-body">
+          <div className="card-body p-2 p-md-3">
             <div className="row g-3 align-items-end mb-3">
               <div className="col-md-8">
                 <label htmlFor="event-search" className="visually-hidden">Search learning events</label>
@@ -518,56 +523,64 @@ function LearningEventList() {
               <div className="text-center text-secondary py-5">{events.length ? 'No events match your search.' : 'No learning events have been registered yet.'}</div>
             ) : (
               <div className="table-responsive learning-course-list-scroll">
-                <table className="table table-hover mb-0">
+                <table className="table table-hover mb-0 learning-list-table">
                   <caption className="visually-hidden">Learning events with event IDs, schedule, offering institution, and available actions</caption>
                   <thead className="table-light">
                     <tr>
-                      <th scope="col" className="text-center">ID No</th>
-                      <th scope="col" className="text-start" style={{ minWidth: '260px' }}>Course Title</th>
-                      <th scope="col" style={{ width: '150px', maxWidth: '150px' }}>Offering Institution</th>
-                      <th scope="col" className="text-nowrap" style={{ minWidth: '150px' }}>Schedule</th>
-                      <th scope="col">Venue</th>
-                      <th scope="col" className="text-center">Status</th>
-                      <th scope="col" className="text-center">Actions</th>
+                      <th scope="col" className="text-center learning-event-list-id">ID No</th>
+                      <SortableTableHeader sort={sort} column="title" className="text-start learning-event-list-title">Course Title</SortableTableHeader>
+                      <SortableTableHeader sort={sort} column="institution" className="d-none d-md-table-cell" style={{ width: '150px', maxWidth: '150px' }}>Offering Institution</SortableTableHeader>
+                      <th scope="col" className="text-nowrap d-none d-md-table-cell" style={{ minWidth: '150px' }}>Schedule</th>
+                      <SortableTableHeader sort={sort} column="venue" className="d-none d-md-table-cell">Venue</SortableTableHeader>
+                      <th scope="col" className="text-center d-none d-md-table-cell">Status</th>
+                      <th scope="col" className="text-center learning-list-actions">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredEvents.map((event) => (
-                      <tr key={event.event_id}>
-                        <td className="align-top text-center">{event.event_id}</td>
-                        <td className="align-top text-start" style={{ lineHeight: 1.1, minWidth: '260px' }}>
-                          <div className="fw-semibold">{event.course_title || event.title}{formatCourseLevel(event.course_level || event.learning_level) && ` ${formatCourseLevel(event.course_level || event.learning_level)}`}</div>
-                          {event.course_department_name && <small className="text-muted">{event.course_department_name}</small>}
-                        </td>
-                        <td className="align-top" style={{ width: '150px', maxWidth: '150px', overflowWrap: 'anywhere' }}>{event.institution_name}</td>
-                        <td className="align-top text-start text-nowrap" style={{ minWidth: '150px' }}>
-                          <div>{formatShortDate(event.start_date)}</div>
-                          {event.end_date && event.end_date !== event.start_date && (
-                            <small className="text-muted d-block">{formatShortDate(event.end_date)}</small>
-                          )}
-                        </td>
-                        <td className="align-top">{event.venue || '—'}</td>
-                        <td className="align-top text-center" style={{ lineHeight: 1.1 }}>
-                          <span className={`badge ${event.status === 'Approved' ? 'text-bg-success' : event.status === 'Rejected' ? 'text-bg-danger' : event.status === 'For evaluation' ? 'text-bg-warning' : 'text-bg-secondary'}`}>
-                            {event.status || 'Submitted'}
-                          </span>
-                          {canEditEvents && event.status === 'Submitted' && <button className="btn btn-outline-secondary p-0 d-flex align-items-center justify-content-center mx-auto mt-1" style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.75rem' }} type="button" onClick={() => updateEventStatus(event, 'For evaluation')} disabled={updatingStatusId === event.event_id} aria-label="Start evaluation" title="Start evaluation"><i className="bi bi-clipboard-check" aria-hidden="true" /></button>}
-                          {canEditEvents && event.status === 'For evaluation' && <div className="d-flex flex-wrap justify-content-center gap-1 mt-1"><button className="btn btn-outline-secondary p-0 d-inline-flex align-items-center justify-content-center" style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.75rem' }} type="button" onClick={() => updateEventStatus(event, 'Approved')} disabled={updatingStatusId === event.event_id} aria-label="Approve proposal" title="Approve proposal"><i className="bi bi-check-lg" aria-hidden="true" /></button><button className="btn btn-outline-secondary p-0 d-inline-flex align-items-center justify-content-center" style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.75rem' }} type="button" onClick={() => updateEventStatus(event, 'Rejected')} disabled={updatingStatusId === event.event_id} aria-label="Reject proposal" title="Reject proposal"><i className="bi bi-x-lg" aria-hidden="true" /></button></div>}
-                          {canEditEvents && event.status === 'Rejected' && String(event.start_date).slice(0, 10) > localTodayApiValue() && <button className="btn btn-outline-secondary p-0 d-inline-flex align-items-center justify-content-center mt-1" style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.75rem' }} type="button" onClick={() => updateEventStatus(event, 'For evaluation')} disabled={updatingStatusId === event.event_id} aria-label="Revert rejected proposal" title="Revert rejected proposal"><i className="bi bi-arrow-counterclockwise" aria-hidden="true" /></button>}
-                        </td>
-                        <td className="align-top text-center text-nowrap">
-                          <button className="btn btn-sm user-action-button me-1" type="button" onClick={() => navigate(`/learning/events/${event.event_id}`)} disabled={event.status === 'Rejected'} aria-label={`View ${event.title}`} title="View event"><i className="bi bi-card-text fs-6" aria-hidden="true" /></button>
-                          {canEditEvents && <button className="btn btn-sm user-action-button me-1" type="button" onClick={() => openEdit(event)} disabled={event.status === 'Rejected'} aria-label={`Edit ${event.title}`} title="Edit event"><i className="bi bi-pencil-square fs-6" aria-hidden="true" /></button>}
-                          {canDeleteEvents && (
-                            <>
-                              <button className="btn btn-sm user-action-button" type="button" onClick={() => deleteEvent(event)} disabled={deletingId === event.event_id || event.status === 'Rejected'} aria-label={`Delete ${event.title}`} title="Delete event">
-                                {deletingId === event.event_id ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <i className="bi bi-trash fs-6" aria-hidden="true" />}
-                              </button>
-                            </>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {sort.order(filteredEvents, { title: (row) => row.course_title || row.title, institution: (row) => row.institution_name, venue: (row) => row.venue }).map((event) => {
+                      const courseLevel = formatCourseLevel(event.course_level || event.learning_level);
+                      const certifiedCount = event.certified_count ?? 0;
+                      return (
+                        <tr key={event.event_id}>
+                          <td className="align-top text-center">{event.event_id}</td>
+                          <td className="align-top text-start learning-event-list-title" style={{ lineHeight: 1.1 }}>
+                            <div className="fw-semibold">{event.course_title || event.title}{courseLevel && <span className="d-none d-md-inline">{` ${courseLevel}`}</span>}</div>
+                            {courseLevel && <small className="text-muted d-block d-md-none mt-1">{courseLevel}</small>}
+                            {event.course_department_name && <small className="text-muted d-none d-md-inline">{event.course_department_name}</small>}
+                          </td>
+                          <td className="align-top d-none d-md-table-cell" style={{ width: '150px', maxWidth: '150px', overflowWrap: 'anywhere' }}>{event.institution_name}</td>
+                          <td className="align-top text-start text-nowrap d-none d-md-table-cell" style={{ minWidth: '150px' }}>
+                            <div>{formatShortDate(event.start_date)}</div>
+                            {event.end_date && event.end_date !== event.start_date && (
+                              <small className="text-muted d-block">{formatShortDate(event.end_date)}</small>
+                            )}
+                          </td>
+                          <td className="align-top d-none d-md-table-cell">{event.venue || '—'}</td>
+                          <td className="align-top text-center d-none d-md-table-cell" style={{ lineHeight: 1.1 }}>
+                            <span className={`badge ${event.status === 'Approved' ? 'text-bg-success' : event.status === 'Rejected' ? 'text-bg-danger' : event.status === 'For evaluation' ? 'text-bg-warning' : 'text-bg-secondary'}`}>
+                              {event.status || 'Submitted'}
+                            </span>
+                            {canEditEvents && event.status === 'Submitted' && <button className="btn btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center mx-auto mt-1" style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.75rem' }} type="button" onClick={() => updateEventStatus(event, 'For evaluation')} disabled={updatingStatusId === event.event_id} aria-label="Start evaluation" title="Start evaluation"><i className="bi bi-clipboard-check" aria-hidden="true" /></button>}
+                            {canEditEvents && event.status === 'For evaluation' && <div className="d-flex flex-wrap justify-content-center gap-1 mt-1"><button className="btn btn-outline-secondary rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.75rem' }} type="button" onClick={() => updateEventStatus(event, 'Approved')} disabled={updatingStatusId === event.event_id} aria-label="Approve proposal" title="Approve proposal"><i className="bi bi-check-lg" aria-hidden="true" /></button><button className="btn btn-outline-secondary rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.75rem' }} type="button" onClick={() => updateEventStatus(event, 'Rejected')} disabled={updatingStatusId === event.event_id} aria-label="Reject proposal" title="Reject proposal"><i className="bi bi-x-lg" aria-hidden="true" /></button></div>}
+                            {canEditEvents && event.status === 'Rejected' && String(event.start_date).slice(0, 10) > localTodayApiValue() && <button className="btn btn-outline-secondary rounded-circle p-0 d-inline-flex align-items-center justify-content-center mt-1" style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.75rem' }} type="button" onClick={() => updateEventStatus(event, 'For evaluation')} disabled={updatingStatusId === event.event_id} aria-label="Revert rejected proposal" title="Revert rejected proposal"><i className="bi bi-arrow-counterclockwise" aria-hidden="true" /></button>}
+                          </td>
+                          <td className="align-top text-center text-nowrap">
+                            <button className="btn btn-sm user-action-button position-relative me-md-1" type="button" onClick={() => navigate(`/learning/events/${event.event_id}`)} disabled={event.status === 'Rejected'} aria-label={`View ${event.title}, certified participants: ${certifiedCount}`} title={`Certified participants: ${certifiedCount}`}>
+                              <i className="bi bi-card-text fs-6" aria-hidden="true" />
+                              <span className="position-absolute top-0 badge rounded-pill text-bg-success view-count-badge" aria-hidden="true">{certifiedCount}</span>
+                            </button>
+                            {canEditEvents && <button className="btn btn-sm user-action-button me-1 d-none d-md-inline-flex" type="button" onClick={() => openEdit(event)} disabled={event.status === 'Rejected'} aria-label={`Edit ${event.title}`} title="Edit event"><i className="bi bi-pencil-square fs-6" aria-hidden="true" /></button>}
+                            {canDeleteEvents && (
+                              <>
+                                <button className="btn btn-sm user-action-button d-none d-md-inline-flex" type="button" onClick={() => deleteEvent(event)} disabled={deletingId === event.event_id || event.status === 'Rejected'} aria-label={`Delete ${event.title}`} title="Delete event">
+                                  {deletingId === event.event_id ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <i className="bi bi-trash fs-6" aria-hidden="true" />}
+                                </button>
+                              </>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

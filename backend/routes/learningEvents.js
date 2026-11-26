@@ -154,6 +154,10 @@ const EVENT_LIST_QUERY = `
            learning_event.department_id, department.name AS department_name,
            learning_event.start_date, learning_event.end_date, learning_event.venue, ${deliveryLabelSql('learning_event.delivery_mode')} AS delivery_mode,
            ${statusLabelSql('learning_event.status')} AS status,
+           (SELECT COUNT(*)
+            FROM learning_participations participation
+            WHERE participation.event_id = learning_event.event_id
+              AND participation.certified = TRUE) AS certified_count,
            learning_event.description, learning_event.created_at, learning_event.updated_at
     FROM learning_events learning_event
     LEFT JOIN learning_courses course ON course.course_id = learning_event.course_id

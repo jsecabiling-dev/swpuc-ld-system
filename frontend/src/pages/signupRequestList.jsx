@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import './userList.css';
@@ -18,6 +19,7 @@ async function readApiResponse(response, fallbackMessage) {
 }
 
 function SignupRequestList() {
+  const sort = useTableSort();
   const { user } = useContext(AuthContext);
   const allowed = Boolean(user?.canAddUsers);
   const [requests, setRequests] = useState([]);
@@ -92,7 +94,7 @@ function SignupRequestList() {
                   <caption className="visually-hidden">Submitted signup requests</caption>
                   <thead className="table-light">
                     <tr>
-                      <th scope="col">Name</th>
+                      <SortableTableHeader sort={sort} column="name">Name</SortableTableHeader>
                       <th scope="col" className="d-none d-md-table-cell">Contact</th>
                       <th scope="col" className="d-none d-md-table-cell">Message</th>
                       <th scope="col" className="d-none d-md-table-cell">Submitted</th>
@@ -100,13 +102,19 @@ function SignupRequestList() {
                       <th scope="col"><span className="d-md-none">Action</span><span className="d-none d-md-inline">Account</span></th>
                     </tr>
                   </thead>
-                  <tbody>{requests.map((request) => <tr key={request.request_id}>
+                  <tbody>{sort.order(requests, { name: (row) => [row.first_name, row.last_name].filter(Boolean).join(' ') }).map((request) => <tr key={request.request_id}>
                     <td className="text-break">{request.first_name} {request.last_name}</td>
                     <td className="d-none d-md-table-cell"><div>{request.email}</div><small>{request.phone_number || '—'}</small></td>
                     <td className="d-none d-md-table-cell" style={{ minWidth: '150px', maxWidth: '300px', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{request.message || '—'}</td>
                     <td className="d-none d-md-table-cell">{new Date(request.created_at).toLocaleString()}</td>
                     <td><label className="visually-hidden" htmlFor={`request-status-${request.request_id}`}>Review status for {request.first_name} {request.last_name}</label><select id={`request-status-${request.request_id}`} className="form-select form-select-sm signup-review-status" value={request.status} disabled={savingId !== null || request.status === 'created'} onChange={(event) => updateStatus(request.request_id, event.target.value)}><option value="pending">Pending</option><option value="reviewed">Reviewed</option><option value="dismissed">Dismissed</option>{request.status === 'created' && <option value="created">Account created</option>}</select></td>
-                    <td>{request.status === 'created' ? <span className="badge text-bg-success">Account created</span> : <button className="btn btn-sm btn-outline-success text-nowrap" type="button" disabled={savingId !== null || request.status === 'dismissed'} onClick={() => createUser(request)}>{savingId === request.request_id ? 'Please wait…' : 'Create user'}</button>}</td>
+                    <td>
+                      {request.status === 'created' ? <span className="badge text-bg-success">Account created</span> : (
+                        <button className="btn btn-sm btn-outline-success table-action-button" type="button" disabled={savingId !== null || request.status === 'dismissed'} onClick={() => createUser(request)} aria-label={savingId === request.request_id ? 'Please wait' : `Create user for ${request.first_name} ${request.last_name}`} title="Create user">
+                          {savingId === request.request_id ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <i className="bi bi-person-plus" aria-hidden="true" />}
+                        </button>
+                      )}
+                    </td>
                   </tr>)}</tbody>
                 </table></div>
               )}

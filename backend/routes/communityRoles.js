@@ -38,13 +38,15 @@ router.use(authenticateToken);
 
 router.get('/:role', async (req, res, next) => {
     const role = String(req.params.role).toLowerCase();
+    if (!Object.hasOwn(roleTables, role)) return res.status(404).json({ success: false, message: 'Community role not found.' });
     const table = roleTables[role];
-    if (!table) return res.status(404).json({ success: false, message: 'Community role not found.' });
     try {
         const [rows] = await db.execute(
             `SELECT u.user_id, u.first_name, u.middle_name, u.last_name, u.suffix,
                     u.email, u.phone_number, u.profilepict, u.is_active,
-                    o.name AS unit_name, a.created_at AS assigned_at
+                    o.name AS unit_name, a.created_at AS assigned_at,
+                    (SELECT COUNT(*) FROM ${role}_courses assignment
+                     WHERE assignment.${role}_user_id = a.user_id) AS assigned_course_count
              FROM ${table} a
              JOIN users u ON u.user_id = a.user_id
              LEFT JOIN organizational_units o ON o.unit_id = u.unit_id

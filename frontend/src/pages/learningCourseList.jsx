@@ -1,13 +1,18 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import CommunityProfileAvatar from '../components/CommunityProfileAvatar';
 import SiteFooter from '../components/SiteFooter';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 
+const accreditationName = (person) => [person.first_name, person.middle_name, person.last_name, person.suffix].filter(Boolean).join(' ');
+
 function LearningCourseList() {
+  const courseSort = useTableSort();
+  const accreditationSort = useTableSort();
   const location = useLocation();
   const { user } = useContext(AuthContext);
   const canAdd = Boolean(user?.canAddCourses);
@@ -216,26 +221,25 @@ function LearningCourseList() {
   return (
     <div className="min-vh-100 bg-light d-flex flex-column">
       <BrandHeader />
-      <main className="container py-4 flex-grow-1">
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+      <main className="container py-4 flex-grow-1 learning-list">
+        <div className="d-flex flex-md-wrap align-items-end align-items-md-center justify-content-between gap-2 gap-md-3 mb-4">
           <div>
             <p className="text-success text-uppercase fw-bold small mb-1">Learning Management</p>
             <h1 className="h2 mb-0" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>Learning Course List</h1>
           </div>
-          <div className="d-flex gap-2">
-            {canAdd && (
-              <Link className="btn btn-success" to="/learning/courses/new">
-                <i className="bi bi-plus-lg me-1" aria-hidden="true" /> Add New Learning Course
-              </Link>
-            )}
-          </div>
+          {canAdd && (
+            <Link className="btn btn-success flex-shrink-0 learning-list-add" to="/learning/courses/new" aria-label="Add New Learning Course" title="Add New Learning Course">
+              <i className="bi bi-plus-lg me-md-1" aria-hidden="true" />
+              <span className="d-none d-md-inline">Add New Learning Course</span>
+            </Link>
+          )}
         </div>
 
         {error && !modalMode && <div className="alert alert-danger" role="alert">{error}</div>}
         {success && <div className="alert alert-success" role="status">{success}</div>}
 
         <section className="card border-0 shadow-sm">
-          <div className="card-body">
+          <div className="card-body p-2 p-md-3">
             <div className="mb-3">
               <label htmlFor="course-search" className="visually-hidden">Search courses</label>
               <input id="course-search" className="form-control" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by course title, level, or hosting department" />
@@ -249,32 +253,32 @@ function LearningCourseList() {
               <div className="text-center text-secondary py-5">{courses.length ? 'No learning courses match your search.' : 'No learning courses have been added yet.'}</div>
             ) : (
               <div className="table-responsive learning-course-list-scroll">
-                <table className="table table-hover align-middle mb-0">
-                  <caption className="visually-hidden">Learning course titles and hosting departments</caption>
+                <table className="table table-hover align-middle mb-0 learning-list-table">
+                  <caption className="visually-hidden">Learning course catalog</caption>
                   <thead className="table-light">
-                    <tr><th scope="col" className="text-nowrap text-center">ID No</th>
-                      <th scope="col">Course Title</th>
-                      <th scope="col" className="text-center">Learning Level</th>
-                      <th scope="col">Hosting Department</th>
-                      <th scope="col" className="text-center">Actions</th>
+                    <tr><th scope="col" className="d-none d-md-table-cell text-nowrap text-center">ID No</th>
+                      <SortableTableHeader sort={courseSort} column="title">Course Title</SortableTableHeader>
+                      <th scope="col" className="text-center learning-list-level"><span className="d-none d-md-inline">Learning </span>Level</th>
+                      <SortableTableHeader sort={courseSort} column="department" className="d-none d-md-table-cell">Hosting Department</SortableTableHeader>
+                      <th scope="col" className="text-center learning-list-actions">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...filteredCourses].sort((a, b) => Number(b.course_id) - Number(a.course_id)).map((course) => (
-                      <tr key={course.course_id}><td className="text-nowrap text-center">{course.course_id}</td>
+                    {courseSort.order(filteredCourses, { title: (row) => row.title, department: (row) => row.department_name }, (a, b) => Number(b.course_id) - Number(a.course_id)).map((course) => (
+                      <tr key={course.course_id}><td className="d-none d-md-table-cell text-nowrap text-center">{course.course_id}</td>
                         <td className="fw-semibold">{course.title}</td>
                         <td className="text-center">{course.learning_level || 'Not assigned'}</td>
-                        <td>{course.department_name || 'Not assigned'}</td>
+                        <td className="d-none d-md-table-cell">{course.department_name || 'Not assigned'}</td>
                         <td className="text-center text-nowrap">
-                          <button className="btn btn-sm user-action-button me-1" type="button" onClick={() => showView(course)} aria-label={`View ${course.title}`} title={`View ${course.title}`}>
+                          <button className="btn btn-sm user-action-button me-md-1" type="button" onClick={() => showView(course)} aria-label={`View ${course.title}`} title={`View ${course.title}`}>
                             <i className="bi bi-card-text fs-6" aria-hidden="true" />
                           </button>
-                          {canEdit && <button className="btn btn-sm user-action-button me-1" type="button" onClick={() => showEdit(course)} aria-label={`Edit ${course.title}`} title={`Edit ${course.title}`}>
+                          {canEdit && <button className="btn btn-sm user-action-button me-1 d-none d-md-inline-flex" type="button" onClick={() => showEdit(course)} aria-label={`Edit ${course.title}`} title={`Edit ${course.title}`}>
                             <i className="bi bi-pencil-square fs-6" aria-hidden="true" />
                           </button>}
                           {canDelete && (
                             <>
-                              <button className="btn btn-sm user-action-button" type="button" onClick={() => deleteCourse(course)} aria-label={`Delete ${course.title}`} title={`Delete ${course.title}`} disabled={deletingId === course.course_id}>
+                              <button className="btn btn-sm user-action-button d-none d-md-inline-flex" type="button" onClick={() => deleteCourse(course)} aria-label={`Delete ${course.title}`} title={`Delete ${course.title}`} disabled={deletingId === course.course_id}>
                                 {deletingId === course.course_id ? <span className="spinner-border spinner-border-sm" aria-hidden="true" /> : <i className="bi bi-trash fs-6" aria-hidden="true" />}
                               </button>
                             </>
@@ -323,17 +327,17 @@ function LearningCourseList() {
                               <thead className="table-light">
                                 <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                                   <th scope="col">Profile</th>
-                                  <th scope="col">Name</th>
-                                  <th scope="col">Institution</th>
+                                  <SortableTableHeader sort={accreditationSort} column="name">Name</SortableTableHeader>
+                                  <SortableTableHeader sort={accreditationSort} column="institution">Institution</SortableTableHeader>
                                   <th scope="col" className="text-center">Mentor</th>
                                   <th scope="col" className="text-center">Certifier</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                {[...accreditationRows].sort((a, b) => Number(b.user_id) - Number(a.user_id)).map((person) => (
+                                {accreditationSort.order(accreditationRows, { name: accreditationName, institution: (row) => row.institution_name }, (a, b) => Number(b.user_id) - Number(a.user_id)).map((person) => (
                                   <tr key={person.user_id}><td className="text-nowrap text-center">{person.user_id}</td>
                                     <td><CommunityProfileAvatar person={person} size="2.5rem" /></td>
-                                    <td>{[person.first_name, person.middle_name, person.last_name, person.suffix].filter(Boolean).join(' ')}</td>
+                                    <td>{accreditationName(person)}</td>
                                     <td>{person.institution_name || '—'}</td>
                                     <td className="text-center">{person.isMentor ? <i className="bi bi-check-lg" aria-label="Accredited mentor" /> : <span aria-hidden="true">-</span>}</td>
                                     <td className="text-center">{person.isCertifier ? <i className="bi bi-check-lg" aria-label="Accredited certifier" /> : <span aria-hidden="true">-</span>}</td>

@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { formatShortDate } from '../utils/dateFormat';
@@ -28,6 +29,7 @@ function getDescendantIds(institutions, rootId) {
 }
 
 function InstitutionList() {
+  const sort = useTableSort();
   const { user } = useContext(AuthContext);
   const canAdd = Boolean(user?.canAddEvents);
   const canEdit = Boolean(user?.canEditEvents);
@@ -250,7 +252,7 @@ function InstitutionList() {
                   <caption className="visually-hidden">Institutions, their mother units, and available actions</caption>
                   <thead className="table-light">
                     <tr><th scope="col" className="text-nowrap text-center">ID No</th>
-                      <th scope="col">Institution</th>
+                      <SortableTableHeader sort={sort} column="name">Institution</SortableTableHeader>
                       <th scope="col">Mother institution</th>
                       <th scope="col" className="text-center">Children</th>
                       <th scope="col">Created</th>
@@ -258,7 +260,7 @@ function InstitutionList() {
                     </tr>
                   </thead>
                   <tbody>
-                    {[...filteredInstitutions].sort((a, b) => Number(b.unit_id) - Number(a.unit_id)).map((institution) => (
+                    {sort.order(filteredInstitutions, { name: (row) => row.name }, (a, b) => Number(b.unit_id) - Number(a.unit_id)).map((institution) => (
                       <tr key={institution.unit_id}><td className="text-nowrap text-center">{institution.unit_id}</td>
                         <td>
                           <div className="fw-semibold">{institution.name}</div>

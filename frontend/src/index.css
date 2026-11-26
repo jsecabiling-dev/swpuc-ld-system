@@ -42,6 +42,21 @@
     --bs-btn-disabled-border-color: rgb(27, 151, 212);
 }
 
+.view-count-badge {
+    right: 75%;
+}
+
+.table-action-button,
+.community-action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border-radius: 50%;
+}
+
 .community-action-button {
     transition: box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
@@ -277,7 +292,55 @@ main:has(> .site-footer) {
     max-height: 40px;
 }
 
+@media (min-width: 768px) {
+    .learning-event-list-title {
+        min-width: 260px;
+    }
+}
+
 @media (max-width: 767.98px) {
+    .learning-list {
+        --catalog-actions-width: 4rem;
+    }
+
+    .learning-list-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 50%;
+        margin-inline-end: calc(0.5rem + (var(--catalog-actions-width) - 44px) / 2);
+    }
+
+    .learning-list-table {
+        table-layout: fixed;
+        font-size: 0.875rem;
+        overflow-wrap: anywhere;
+    }
+
+    .learning-list-table > :is(thead, tbody) > tr > * {
+        padding-inline: 0.375rem;
+    }
+
+    .learning-list-level {
+        width: 22%;
+    }
+
+    .learning-event-list-id {
+        width: 3rem;
+    }
+
+    .learning-list-actions {
+        width: var(--catalog-actions-width);
+    }
+
+    .learning-list-table .user-action-button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
     .table-responsive {
         padding-bottom: 1rem;
         scroll-padding-bottom: 1rem;

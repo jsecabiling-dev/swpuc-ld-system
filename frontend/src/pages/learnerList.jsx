@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import './userList.css';
@@ -42,6 +43,7 @@ function LearnerAvatar({ learner }) {
 }
 
 function LearnerList() {
+  const sort = useTableSort();
   const { user } = useContext(AuthContext);
   const [learners, setLearners] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,16 +73,17 @@ function LearnerList() {
         const learnerByUserId = new Map();
         (result.data || []).forEach((record) => {
           if (!learnerByUserId.has(record.user_id)) {
-            learnerByUserId.set(record.user_id, { learner: record, eventKeys: new Set() });
+            learnerByUserId.set(record.user_id, { learner: record, certifiedEventKeys: new Set() });
           }
+          if (Number(record.certified) !== 1) return;
           const learnerEntry = learnerByUserId.get(record.user_id);
           const eventKey = record.event_id
             ? `event:${record.event_id}`
             : `participation:${record.participation_id}`;
-          learnerEntry.eventKeys.add(eventKey);
+          learnerEntry.certifiedEventKeys.add(eventKey);
         });
         setLearners([...learnerByUserId.values()]
-          .map(({ learner, eventKeys }) => ({ ...learner, learning_event_count: eventKeys.size }))
+          .map(({ learner, certifiedEventKeys }) => ({ ...learner, certified_event_count: certifiedEventKeys.size }))
           .sort((a, b) => fullName(a).localeCompare(fullName(b))));
       } catch (loadError) {
         if (loadError.name !== 'AbortError') {
@@ -148,14 +151,14 @@ function LearnerList() {
                   <caption className="visually-hidden">Learner names and affiliations</caption>
                   <thead className="table-light">
                     <tr><th scope="col" className="text-nowrap text-center">ID No</th>
-                      <th scope="col">Name</th>
-                      <th scope="col">Affiliation</th>
-                      <th scope="col" className="text-center">Events Participated</th>
+                      <SortableTableHeader sort={sort} column="name">Name</SortableTableHeader>
+                      <th scope="col">Contact Information</th>
+                      <SortableTableHeader sort={sort} column="unit" className="d-none d-md-table-cell">Affiliation</SortableTableHeader>
                       <th scope="col" className="text-center"><span className="d-md-none">View</span><span className="d-none d-md-inline">Actions</span></th>
                     </tr>
                   </thead>
                   <tbody>
-                    {[...filteredLearners].sort((a, b) => Number(b.user_id) - Number(a.user_id)).map((learner) => (
+                    {sort.order(filteredLearners, { name: fullName, unit: (row) => row.unit_name }, (a, b) => Number(b.user_id) - Number(a.user_id)).map((learner) => (
                       <tr key={learner.user_id}><td className="text-nowrap text-center">{learner.user_id}</td>
                         <td>
                           <div className="d-flex align-items-center gap-2">
@@ -163,16 +166,20 @@ function LearnerList() {
                             <span className="fw-semibold">{fullName(learner)}</span>
                           </div>
                         </td>
-                        <td>{learner.unit_name || '—'}</td>
-                        <td className="text-center">{learner.learning_event_count}</td>
+                        <td className="text-break">
+                          <div>{learner.email || '—'}</div>
+                          <div>{learner.phone_number || '—'}</div>
+                        </td>
+                        <td className="d-none d-md-table-cell">{learner.unit_name || '—'}</td>
                         <td className="text-center">
                           <Link
-                            className="btn btn-sm user-action-button"
+                            className="btn btn-sm user-action-button position-relative"
                             to={`/community/learners/${learner.user_id}`}
-                            aria-label={`View learning journey for ${fullName(learner)}`}
-                            title="View learning journey"
+                            aria-label={`View learning journey for ${fullName(learner)}, certified events: ${learner.certified_event_count}`}
+                            title={`Certified events: ${learner.certified_event_count}`}
                           >
                             <i className="bi bi-card-list fs-6" aria-hidden="true" />
+                            <span className="position-absolute top-0 badge rounded-pill text-bg-success view-count-badge" aria-hidden="true">{learner.certified_event_count}</span>
                           </Link>
                         </td>
                       </tr>

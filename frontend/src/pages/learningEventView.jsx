@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { formatShortDate } from '../utils/dateFormat';
@@ -51,6 +52,7 @@ function ParticipantAvatar({ participant }) {
 }
 
 function LearningEventView() {
+  const sort = useTableSort();
   const { eventId } = useParams();
   const { user } = useContext(AuthContext);
   const canAddProgress = Boolean(user?.canAddProgress);
@@ -520,8 +522,8 @@ function LearningEventView() {
                             </th>
                           )}
                           <th scope="col" className="text-nowrap text-center participant-id-column">ID No</th>
-                          <th scope="col">Name</th>
-                          <th scope="col">Affiliation</th>
+                          <SortableTableHeader sort={sort} column="name">Name</SortableTableHeader>
+                          <SortableTableHeader sort={sort} column="unit">Affiliation</SortableTableHeader>
                           <th scope="col" className="text-center">Attended</th>
                           <th scope="col" className="text-center">Completed</th>
                           <th scope="col" className="text-center">Certified</th>
@@ -529,7 +531,7 @@ function LearningEventView() {
                         </tr>
                       </thead>
                       <tbody>
-                        {[...participants].sort((a, b) => Number(b.participation_id) - Number(a.participation_id)).map((participant) => (
+                        {sort.order(participants, { name: fullName, unit: (row) => row.unit_name }, (a, b) => Number(b.participation_id) - Number(a.participation_id)).map((participant) => (
                           <tr key={participant.participation_id}>
                             {canEditProgress && (
                               <td className="text-center participant-select-column">
@@ -561,7 +563,7 @@ function LearningEventView() {
                             <td className="text-center">{renderStatusMark(participant, 'completed', 'Completed')}</td>
                             <td className="text-center text-nowrap">
                               {participant.certified ? (
-                                <button className="btn btn-sm btn-outline-success" type="button" onClick={() => printParticipantCertificate(participant)} aria-label={`Print certificate for ${fullName(participant)}`} title="Print certificate">
+                                <button className="btn btn-sm btn-outline-success table-action-button" type="button" onClick={() => printParticipantCertificate(participant)} aria-label={`Print certificate for ${fullName(participant)}`} title="Print certificate">
                                   <i className="bi bi-printer" aria-hidden="true" />
                                 </button>
                               ) : (

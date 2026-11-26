@@ -39,9 +39,7 @@
     width: 48px;
   }
 
-  .learner-list-page .table tr > :nth-child(1),
-  .learner-list-page .table tr > :nth-child(3),
-  .learner-list-page .table tr > :nth-child(4) {
+  .learner-list-page .table tr > :nth-child(1) {
     display: none;
   }
 
@@ -249,15 +247,6 @@
 
   .users-page .user-action-button .bi {
     font-size: 0.8125rem !important;
-  }
-
-  .community-role-list main .community-action-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    padding: 0;
   }
 
   .users-page .modal-dialog {

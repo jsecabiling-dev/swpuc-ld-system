@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import CommunityProfileAvatar from '../components/CommunityProfileAvatar';
@@ -15,6 +16,7 @@ function fullName(person) {
 }
 
 function MentorDetail() {
+  const sort = useTableSort();
   const { user } = useContext(AuthContext);
   const { userId } = useParams();
   const canEditCourses = Boolean(user?.canEditCourses);
@@ -148,8 +150,8 @@ function MentorDetail() {
                   <div><h2 className="h5 fw-bold mb-1">Learning Courses</h2><p className="text-secondary mb-0">Courses this mentor is assigned to teach.</p></div>
                   {canEditCourses && <button className="btn btn-success d-none d-md-inline-flex" type="button" onClick={openAddCourses}><i className="bi bi-plus-lg me-2" aria-hidden="true" />Add Courses</button>}
                 </div>
-                {courses.length ? <div className="table-responsive"><table className="table table-hover align-middle mb-0"><caption className="visually-hidden">Courses assigned to {fullName(mentor)}</caption><thead className="table-light"><tr><th scope="col" className="text-nowrap text-center">ID No</th><th>Course</th><th>Level</th><th>Department</th>{canEditCourses && <th className="mentor-course-actions text-center">Actions</th>}</tr></thead><tbody>
-                  {[...courses].sort((a, b) => Number(b.course_id) - Number(a.course_id)).map((course) => <tr key={course.course_id}><td className="text-nowrap text-center">{course.course_id}</td><td className="fw-semibold">{course.title}</td><td>{course.learning_level || '—'}</td><td>{course.department_name || '—'}</td>{canEditCourses && <td className="mentor-course-actions text-center"><button className="btn btn-sm btn-outline-secondary" type="button" onClick={() => removeCourse(course)} aria-label={`Remove ${course.title} assignment`}><i className="bi bi-trash text-secondary" aria-hidden="true" /></button></td>}</tr>)}
+                {courses.length ? <div className="table-responsive"><table className="table table-hover align-middle mb-0"><caption className="visually-hidden">Courses assigned to {fullName(mentor)}</caption><thead className="table-light"><tr><th scope="col" className="text-nowrap text-center">ID No</th><SortableTableHeader sort={sort} column="title">Course</SortableTableHeader><th>Level</th><SortableTableHeader sort={sort} column="department">Department</SortableTableHeader>{canEditCourses && <th className="mentor-course-actions text-center">Actions</th>}</tr></thead><tbody>
+                  {sort.order(courses, { title: (row) => row.title, department: (row) => row.department_name }, (a, b) => Number(b.course_id) - Number(a.course_id)).map((course) => <tr key={course.course_id}><td className="text-nowrap text-center">{course.course_id}</td><td className="fw-semibold">{course.title}</td><td>{course.learning_level || '—'}</td><td>{course.department_name || '—'}</td>{canEditCourses && <td className="mentor-course-actions text-center"><button className="btn btn-sm btn-outline-secondary table-action-button" type="button" onClick={() => removeCourse(course)} aria-label={`Remove ${course.title} assignment`}><i className="bi bi-trash text-secondary" aria-hidden="true" /></button></td>}</tr>)}
                 </tbody></table></div> : <p className="text-secondary text-center py-4 mb-0">No courses are assigned to this mentor yet.</p>}
               </div>
             </section>

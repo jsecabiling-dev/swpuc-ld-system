@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import SortableTableHeader, { useTableSort } from '../components/SortableTableHeader';
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { processProfilePicture } from '../utils/processProfilePicture';
@@ -65,6 +66,7 @@ function displayLabel(value = '') {
 }
 
 function UserList() {
+  const sort = useTableSort();
   const { user } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [units, setUnits] = useState([]);
@@ -503,15 +505,15 @@ function UserList() {
                 <caption className="visually-hidden">Users with account status and available actions</caption>
                 <thead className="table-light">
                   <tr><th scope="col" className="text-nowrap text-center">ID No</th>
-                    <th scope="col">Name</th>
+                    <SortableTableHeader sort={sort} column="name">Name</SortableTableHeader>
                     <th scope="col">Contact</th>
-                    <th scope="col">Institution</th>
+                    <SortableTableHeader sort={sort} column="unit">Institution</SortableTableHeader>
                     <th scope="col">Status</th>
                     <th scope="col" className="text-center"><span className="d-md-none">View</span><span className="d-none d-md-inline">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[...filteredUsers].sort((a, b) => Number(b.user_id) - Number(a.user_id)).map((item) => (
+                  {sort.order(filteredUsers, { name: fullName, unit: (row) => row.unit_name }, (a, b) => Number(b.user_id) - Number(a.user_id)).map((item) => (
                     <tr key={item.user_id}><td className="text-nowrap text-center">{item.user_id}</td>
                       <td>
                         <div className="d-flex align-items-center gap-2">
