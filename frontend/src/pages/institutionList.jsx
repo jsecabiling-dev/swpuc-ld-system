@@ -5,6 +5,7 @@ import SortableTableHeader, { useTableSort } from '../components/SortableTableHe
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { formatShortDate } from '../utils/dateFormat';
+import './organizationalUnitList.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 const UNIT_TYPES = ['Union', 'Mission', 'District', 'Local_Church', 'Hospital', 'School', 'Services'];
@@ -192,26 +193,24 @@ function InstitutionList() {
   return (
     <div className="min-vh-100 bg-light d-flex flex-column">
       <BrandHeader />
-      <main className="container py-4 flex-grow-1">
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+      <main className="organizational-unit-list container py-3 py-md-4 flex-grow-1">
+        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 gap-md-3 mb-3 mb-md-4">
           <div>
             <p className="text-success text-uppercase fw-bold small mb-1">Institution Management</p>
             <h1 className="h2 mb-0" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>Institution List</h1>
           </div>
-          <div className="d-flex gap-2">
-            {canAdd && (
-              <Link className="btn btn-success" to="/institutions/new">
-                <i className="bi bi-plus-lg me-1" aria-hidden="true" /> Add New Institution
-              </Link>
-            )}
-          </div>
+          {canAdd && (
+            <Link className="btn btn-success d-none d-md-inline-block ms-auto" to="/institutions/new">
+              <i className="bi bi-plus-lg me-1" aria-hidden="true" /> Add New Institution
+            </Link>
+          )}
         </div>
 
         {error && <div className="alert alert-danger" role="alert">{error}</div>}
         {success && <div className="alert alert-success" role="status">{success}</div>}
 
         <section className="card border-0 shadow-sm">
-          <div className="card-body">
+          <div className="card-body p-2 p-md-3">
             {childFilterRoot && (
               <div className="alert alert-secondary d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3" role="status">
                 <span>Showing {childFilterRoot.name} and all of its descendant institutions.</span>
@@ -220,7 +219,7 @@ function InstitutionList() {
                 </button>
               </div>
             )}
-            <div className="row g-3 align-items-end mb-3">
+            <div className="row g-2 g-md-3 align-items-end mb-2 mb-md-3">
               <div className="col-md-8">
                 <label htmlFor="institution-search" className="visually-hidden">Search institutions</label>
                 <input
@@ -241,11 +240,11 @@ function InstitutionList() {
             </div>
 
             {loading ? (
-              <div className="text-center text-secondary py-5" role="status">
+              <div className="text-center text-secondary py-3 py-md-5" role="status">
                 <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" /> Loading institutions...
               </div>
             ) : filteredInstitutions.length === 0 ? (
-              <div className="text-center text-secondary py-5">No institutions match your search.</div>
+              <div className="text-center text-secondary py-3 py-md-5">No institutions match your search.</div>
             ) : (
               <div className="table-responsive institution-list-scroll">
                 <table className="table table-hover align-middle mb-0">
@@ -253,9 +252,9 @@ function InstitutionList() {
                   <thead className="table-light">
                     <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                       <SortableTableHeader sort={sort} column="name">Institution</SortableTableHeader>
-                      <th scope="col">Mother institution</th>
-                      <th scope="col" className="text-center">Children</th>
-                      <th scope="col">Created</th>
+                      <th scope="col" className="d-none d-md-table-cell">Mother institution</th>
+                      <th scope="col" className="d-none d-md-table-cell text-center">Children</th>
+                      <th scope="col" className="d-none d-md-table-cell">Created</th>
                       <th scope="col" className="text-center">Actions</th>
                     </tr>
                   </thead>
@@ -266,12 +265,12 @@ function InstitutionList() {
                           <div className="fw-semibold">{institution.name}</div>
                           <small className="text-muted">{formatLabel(institution.unit_type)}</small>
                         </td>
-                        <td>{institution.parent_name || <span className="text-muted">—</span>}</td>
-                        <td className="text-center">{institution.child_count}</td>
-                        <td>{formatShortDate(institution.created_at)}</td>
+                        <td className="d-none d-md-table-cell">{institution.parent_name || <span className="text-muted">—</span>}</td>
+                        <td className="d-none d-md-table-cell text-center">{institution.child_count}</td>
+                        <td className="d-none d-md-table-cell">{formatShortDate(institution.created_at)}</td>
                         <td className="text-center text-nowrap">
                           <button
-                            className="btn btn-sm user-action-button me-1"
+                            className="btn btn-sm user-action-button d-none d-md-inline-flex me-1"
                             type="button"
                             onClick={() => {
                               if (childFilterRootId === institution.unit_id) {
@@ -288,11 +287,11 @@ function InstitutionList() {
                           >
                             <i className={`bi ${childFilterRootId === institution.unit_id ? 'bi-arrow-clockwise' : 'bi-diagram-3'} fs-6`} aria-hidden="true" />
                           </button>
-                          <button className="btn btn-sm user-action-button me-1" type="button" onClick={() => showView(institution)} aria-label={`View ${institution.name}`} title={`View ${institution.name}`}>
+                          <button className="btn btn-sm user-action-button me-md-1" type="button" onClick={() => showView(institution)} aria-label={`View ${institution.name}`} title={`View ${institution.name}`}>
                             <i className="bi bi-card-text fs-6" aria-hidden="true" />
                           </button>
                           {canEdit && (
-                            <button className="btn btn-sm user-action-button" type="button" onClick={() => showEdit(institution)} aria-label={`Edit ${institution.name}`} title={`Edit ${institution.name}`}>
+                            <button className="btn btn-sm user-action-button d-none d-md-inline-flex" type="button" onClick={() => showEdit(institution)} aria-label={`Edit ${institution.name}`} title={`Edit ${institution.name}`}>
                               <i className="bi bi-pencil-square fs-6" aria-hidden="true" />
                             </button>
                           )}
@@ -312,7 +311,7 @@ function InstitutionList() {
               <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${modalMode === 'edit' ? 'modal-lg' : ''}`}>
                 <div className="modal-content border-0 shadow">
                   <div className="modal-header bg-light">
-                    <h2 id="institution-modal-title" className="modal-title h5 fw-bold">
+                    <h2 id="institution-modal-title" className={`modal-title h5 fw-bold${modalMode === 'view' ? ' institution-details-title' : ''}`}>
                       {modalMode === 'view' ? 'Institution details' : `Edit ${selectedInstitution.name}`}
                     </h2>
                     <button className="btn-close" type="button" onClick={closeModal} aria-label="Close" />
@@ -369,7 +368,7 @@ function InstitutionList() {
                   {modalMode === 'view' && (
                     <div className="modal-footer">
                       <button className="btn btn-outline-secondary" type="button" onClick={closeModal}>Close</button>
-                      {canEdit && <button className="btn btn-success" type="button" onClick={() => showEdit(selectedInstitution)}>Edit institution</button>}
+                      {canEdit && <button className="btn btn-success d-none d-md-inline-block" type="button" onClick={() => showEdit(selectedInstitution)}>Edit institution</button>}
                     </div>
                   )}
                 </div>

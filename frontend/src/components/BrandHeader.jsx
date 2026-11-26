@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Collapse, Dropdown } from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { Dropdown } from 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import sdaLogoGreen from '../pages/thumbnails/sda_logo_green.png';
 import { AuthContext } from '../context/AuthContext';
 import './BrandHeader.css';
@@ -40,9 +40,6 @@ function BrandHeader({ showMenu = true }) {
     menu.querySelectorAll('[data-bs-toggle="dropdown"]').forEach((toggle) => {
       Dropdown.getInstance(toggle)?.hide();
     });
-    if (menu.classList.contains('show')) {
-      Collapse.getOrCreateInstance(menu, { toggle: false }).hide();
-    }
   };
 
   return (
@@ -100,68 +97,55 @@ function BrandHeader({ showMenu = true }) {
       </nav>
 
       {showMenu && user && (
-        <nav className="navbar navbar-expand-lg navbar-light border-bottom shadow-sm" style={{ backgroundColor: '#e2e8f0' }} aria-label="Main navigation">
-          <div className="container">
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#site-menu"
-              aria-controls="site-menu"
-              aria-expanded="false"
-              aria-label="Toggle navigation menu"
-            >
-              <span className="navbar-toggler-icon" />
-            </button>
-
-            <div className="collapse navbar-collapse" id="site-menu" onClick={handleMenuSelection}>
-              <ul className="navbar-nav gap-2 gap-lg-4">
-                <li className="nav-item">
-                  <NavLink className="nav-link d-flex align-items-center" to={user ? '/home' : '/'} end><i className="bi bi-house-door me-2" aria-hidden="true" />Home</NavLink>
-                </li>
-                <li className="nav-item dropdown">
-                  <button className="nav-link dropdown-toggle d-flex align-items-center" type="button" id="community-menu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i className="bi bi-people me-2" aria-hidden="true" />
-                    Community
-                  </button>
-                  <ul className="dropdown-menu" aria-labelledby="community-menu">
-                    <li><NavLink className="dropdown-item" to="/users"><i className="bi bi-person me-2" aria-hidden="true" />User</NavLink></li>
-                    <li><NavLink className="dropdown-item" to="/community/learners"><i className="bi bi-mortarboard me-2" aria-hidden="true" />Learner</NavLink></li>
-                    <li><NavLink className="dropdown-item" to="/community/mentors"><i className="bi bi-person-workspace me-2" aria-hidden="true" />Mentor</NavLink></li>
-                    <li><NavLink className="dropdown-item" to="/community/certifiers"><i className="bi bi-patch-check me-2" aria-hidden="true" />Certifier</NavLink></li>
-                  </ul>
-                </li>
-                <li className="nav-item dropdown">
-                  <button className="nav-link dropdown-toggle d-flex align-items-center" type="button" id="learning-menu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i className="bi bi-book me-2" aria-hidden="true" />
-                    Learning
-                  </button>
-                  <ul className="dropdown-menu" aria-labelledby="learning-menu">
-                    <li><NavLink className="dropdown-item" to="/learning/courses"><i className="bi bi-journal-bookmark me-2" aria-hidden="true" />Catalog</NavLink></li>
-                    <li><NavLink className="dropdown-item" to="/learning/events"><i className="bi bi-calendar-event me-2" aria-hidden="true" />Event</NavLink></li>
-                  </ul>
-                </li>
-                <li className="nav-item dropdown">
-                  <button className="nav-link dropdown-toggle d-flex align-items-center" type="button" id="organizational-unit-menu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i className="bi bi-diagram-3 me-2" aria-hidden="true" />
-                    Organizational Unit
-                  </button>
-                  <ul className="dropdown-menu" aria-labelledby="organizational-unit-menu">
-                    <li><NavLink className="dropdown-item" to="/institutions"><i className="bi bi-building me-2" aria-hidden="true" />Institution</NavLink></li>
-                    <li><hr className="dropdown-divider" /></li>
-                    <li><NavLink className="dropdown-item" to="/departments"><i className="bi bi-diagram-2 me-2" aria-hidden="true" />Department</NavLink></li>
-                  </ul>
-                </li>
-                <li className="nav-item dropdown">
-                  <button className="nav-link dropdown-toggle d-flex align-items-center" type="button" id="help-menu" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i className="bi bi-question-circle me-2" aria-hidden="true" />Help
-                  </button>
-                  <ul className="dropdown-menu" aria-labelledby="help-menu">
-                    <li><NavLink className="dropdown-item" to="/help"><i className="bi bi-journal-text me-2" aria-hidden="true" />Help and user guide</NavLink></li>
-                  </ul>
-                </li>
-              </ul>
-            </div>
+        <nav className="brand-menu navbar navbar-expand navbar-light border-bottom shadow-sm" style={{ backgroundColor: '#e2e8f0' }} aria-label="Main navigation">
+          <div className="container" onClick={handleMenuSelection}>
+            <ul className="navbar-nav flex-wrap column-gap-2 column-gap-lg-4">
+              <li className="nav-item">
+                <NavLink className="nav-link d-flex align-items-center" to={user ? '/home' : '/'} end><i className="bi bi-house-door me-md-2" aria-hidden="true" /><span className="visually-hidden-mobile">Home</span></NavLink>
+              </li>
+              <li className="nav-item dropdown">
+                <button className="nav-link dropdown-toggle d-flex align-items-center" type="button" id="community-menu" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i className="bi bi-people me-md-2" aria-hidden="true" />
+                  <span className="visually-hidden-mobile">Community</span>
+                </button>
+                <ul className="dropdown-menu" aria-labelledby="community-menu">
+                  <li><NavLink className="dropdown-item" to="/users"><i className="bi bi-person me-2" aria-hidden="true" />User</NavLink></li>
+                  <li><NavLink className="dropdown-item" to="/community/learners"><i className="bi bi-mortarboard me-2" aria-hidden="true" />Learner</NavLink></li>
+                  <li><NavLink className="dropdown-item" to="/community/mentors"><i className="bi bi-person-workspace me-2" aria-hidden="true" />Mentor</NavLink></li>
+                  <li><NavLink className="dropdown-item" to="/community/certifiers"><i className="bi bi-patch-check me-2" aria-hidden="true" />Certifier</NavLink></li>
+                </ul>
+              </li>
+              <li className="nav-item dropdown">
+                <button className="nav-link dropdown-toggle d-flex align-items-center" type="button" id="learning-menu" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i className="bi bi-book me-md-2" aria-hidden="true" />
+                  <span className="visually-hidden-mobile">Learning</span>
+                </button>
+                <ul className="dropdown-menu" aria-labelledby="learning-menu">
+                  <li><NavLink className="dropdown-item" to="/learning/courses"><i className="bi bi-journal-bookmark me-2" aria-hidden="true" />Catalog</NavLink></li>
+                  <li><NavLink className="dropdown-item" to="/learning/events"><i className="bi bi-calendar-event me-2" aria-hidden="true" />Event</NavLink></li>
+                </ul>
+              </li>
+              <li className="nav-item dropdown">
+                <button className="nav-link dropdown-toggle d-flex align-items-center" type="button" id="organizational-unit-menu" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i className="bi bi-diagram-3 me-md-2" aria-hidden="true" />
+                  <span className="visually-hidden-mobile">Organizational Unit</span>
+                </button>
+                <ul className="dropdown-menu" aria-labelledby="organizational-unit-menu">
+                  <li><NavLink className="dropdown-item" to="/institutions"><i className="bi bi-building me-2" aria-hidden="true" />Institution</NavLink></li>
+                  <li><hr className="dropdown-divider" /></li>
+                  <li><NavLink className="dropdown-item" to="/departments"><i className="bi bi-diagram-2 me-2" aria-hidden="true" />Department</NavLink></li>
+                </ul>
+              </li>
+              <li className="nav-item dropdown">
+                <button className="nav-link dropdown-toggle d-flex align-items-center" type="button" id="help-menu" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i className="bi bi-question-circle me-md-2" aria-hidden="true" />
+                  <span className="visually-hidden-mobile">Help</span>
+                </button>
+                <ul className="dropdown-menu" aria-labelledby="help-menu">
+                  <li><NavLink className="dropdown-item" to="/help"><i className="bi bi-journal-text me-2" aria-hidden="true" />Help and user guide</NavLink></li>
+                </ul>
+              </li>
+            </ul>
           </div>
         </nav>
       )}

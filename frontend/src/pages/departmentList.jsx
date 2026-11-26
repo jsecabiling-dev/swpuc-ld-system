@@ -5,6 +5,7 @@ import SortableTableHeader, { useTableSort } from '../components/SortableTableHe
 import BrandHeader from '../components/BrandHeader';
 import SiteFooter from '../components/SiteFooter';
 import { formatShortDate } from '../utils/dateFormat';
+import './organizationalUnitList.css';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
 
@@ -141,27 +142,25 @@ function DepartmentList() {
   return (
     <div className="min-vh-100 bg-light d-flex flex-column">
       <BrandHeader />
-      <main className="container py-4 flex-grow-1">
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+      <main className="organizational-unit-list container py-3 py-md-4 flex-grow-1">
+        <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 gap-md-3 mb-3 mb-md-4">
           <div>
             <p className="text-success text-uppercase fw-bold small mb-1">Entity Management</p>
             <h1 className="h2 mb-0" style={{ fontFamily: "'DM Serif Display', serif", color: '#1a202c' }}>Department List</h1>
           </div>
-          <div className="d-flex gap-2">
-            {canAdd && (
-              <Link className="btn btn-success" to="/departments/new">
-                <i className="bi bi-plus-lg me-1" aria-hidden="true" /> Add New Department
-              </Link>
-            )}
-          </div>
+          {canAdd && (
+            <Link className="btn btn-success d-none d-md-inline-block ms-auto" to="/departments/new">
+              <i className="bi bi-plus-lg me-1" aria-hidden="true" /> Add New Department
+            </Link>
+          )}
         </div>
 
         {error && <div className="alert alert-danger" role="alert">{error}</div>}
         {success && <div className="alert alert-success" role="status">{success}</div>}
 
         <section className="card border-0 shadow-sm">
-          <div className="card-body">
-            <div className="row g-3 align-items-end mb-3">
+          <div className="card-body p-2 p-md-3">
+            <div className="row g-2 g-md-3 align-items-end mb-2 mb-md-3">
               <div className="col-md-12">
                 <label htmlFor="department-search" className="visually-hidden">Search departments</label>
                 <input id="department-search" className="form-control" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search departments by name or description" />
@@ -169,11 +168,11 @@ function DepartmentList() {
             </div>
 
             {loading ? (
-              <div className="text-center text-secondary py-5" role="status">
+              <div className="text-center text-secondary py-3 py-md-5" role="status">
                 <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" /> Loading departments...
               </div>
             ) : filteredDepartments.length === 0 ? (
-              <div className="text-center text-secondary py-5">No departments match your search.</div>
+              <div className="text-center text-secondary py-3 py-md-5">No departments match your search.</div>
             ) : (
               <div className="table-responsive department-list-scroll">
                 <table className="table table-hover align-middle mb-0">
@@ -181,7 +180,7 @@ function DepartmentList() {
                   <thead className="table-light">
                     <tr><th scope="col" className="text-nowrap text-center">ID No</th>
                       <SortableTableHeader sort={sort} column="name">Department</SortableTableHeader>
-                      <th scope="col">Created</th>
+                      <th scope="col" className="d-none d-md-table-cell">Created</th>
                       <th scope="col" className="text-center">Actions</th>
                     </tr>
                   </thead>
@@ -190,15 +189,15 @@ function DepartmentList() {
                       <tr key={department.department_id}><td className="text-nowrap text-center">{department.department_id}</td>
                         <td>
                           <div className="fw-semibold">{department.name}</div>
-                          <small className="text-muted">{department.description || 'Department'}</small>
+                          <small className="text-muted d-none d-md-inline">{department.description || 'Department'}</small>
                         </td>
-                        <td>{formatShortDate(department.created_at)}</td>
+                        <td className="d-none d-md-table-cell">{formatShortDate(department.created_at)}</td>
                         <td className="text-center text-nowrap">
-                          <button className="btn btn-sm user-action-button me-1" type="button" onClick={() => showView(department)} aria-label={`View ${department.name}`} title={`View ${department.name}`}>
+                          <button className="btn btn-sm user-action-button me-md-1" type="button" onClick={() => showView(department)} aria-label={`View ${department.name}`} title={`View ${department.name}`}>
                             <i className="bi bi-card-text fs-6" aria-hidden="true" />
                           </button>
                           {canEdit && (
-                            <button className="btn btn-sm user-action-button" type="button" onClick={() => showEdit(department)} aria-label={`Edit ${department.name}`} title={`Edit ${department.name}`}>
+                            <button className="btn btn-sm user-action-button d-none d-md-inline-flex" type="button" onClick={() => showEdit(department)} aria-label={`Edit ${department.name}`} title={`Edit ${department.name}`}>
                               <i className="bi bi-pencil-square fs-6" aria-hidden="true" />
                             </button>
                           )}
@@ -218,7 +217,9 @@ function DepartmentList() {
               <div className={`modal-dialog modal-dialog-centered modal-dialog-scrollable ${modalMode === 'edit' ? 'modal-lg' : ''}`}>
                 <div className="modal-content border-0 shadow">
                   <div className="modal-header bg-light">
-                    <h2 id="department-modal-title" className="modal-title h5 fw-bold">{modalMode === 'view' ? 'Department details' : `Edit ${selectedDepartment.name}`}</h2>
+                    <h2 id="department-modal-title" className={`modal-title h5 fw-bold${modalMode === 'view' ? ' department-details-title' : ''}`}>
+                      {modalMode === 'view' ? 'Department Details' : `Edit ${selectedDepartment.name}`}
+                    </h2>
                     <button className="btn-close" type="button" onClick={closeModal} aria-label="Close" />
                   </div>
                   {modalMode === 'view' ? (
@@ -253,7 +254,7 @@ function DepartmentList() {
                   {modalMode === 'view' && (
                     <div className="modal-footer">
                       <button className="btn btn-outline-secondary" type="button" onClick={closeModal}>Close</button>
-                      {canEdit && <button className="btn btn-success" type="button" onClick={() => showEdit(selectedDepartment)}>Edit department</button>}
+                      {canEdit && <button className="btn btn-success d-none d-md-inline-block" type="button" onClick={() => showEdit(selectedDepartment)}>Edit department</button>}
                     </div>
                   )}
                 </div>

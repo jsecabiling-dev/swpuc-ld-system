@@ -1,0 +1,62 @@
+.organizational-unit-list .modal-title.department-details-title {
+  color: var(--bs-secondary-color);
+}
+
+@media (max-width: 767.98px) {
+  .organizational-unit-list {
+    font-size: 0.875rem;
+  }
+
+  .organizational-unit-list h1 {
+    font-size: 1.125rem;
+  }
+
+  .organizational-unit-list .btn {
+    --bs-btn-font-size: 0.8125rem;
+  }
+
+  .organizational-unit-list :is(.form-control, .form-select) {
+    padding-block: 0.25rem;
+  }
+
+  .organizational-unit-list .alert {
+    padding: 0.5rem 0.625rem;
+    overflow-wrap: anywhere;
+  }
+
+  .organizational-unit-list .table > :not(caption) > * > * {
+    padding: 0.25rem 0.375rem;
+    overflow-wrap: break-word;
+  }
+
+  .organizational-unit-list thead th {
+    vertical-align: bottom;
+  }
+
+  .organizational-unit-list thead th > .d-inline-flex {
+    display: flex !important;
+    align-items: flex-end !important;
+  }
+
+  .organizational-unit-list .user-action-button .bi {
+    font-size: 0.875rem !important;
+  }
+
+  .organizational-unit-list .modal {
+    --bs-modal-padding: 0.75rem;
+    --bs-modal-header-padding: 0.75rem;
+  }
+
+  .organizational-unit-list .modal :is(h2, h3) {
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  .organizational-unit-list .modal-title:is(.institution-details-title, .department-details-title) {
+    color: var(--bs-primary);
+  }
+
+  .organizational-unit-list .modal-title.institution-details-title {
+    text-transform: capitalize;
+  }
+}
